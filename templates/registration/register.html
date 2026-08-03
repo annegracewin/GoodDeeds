@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up – GoodDeeds{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-card {
+        max-width: 440px;
+        margin: 40px auto;
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 40px 32px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+    }
+    .auth-card .logo {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text);
+        text-align: center;
+    }
+    .auth-card .logo i {
+        color: var(--green-primary);
+    }
+    .auth-card .subtitle {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+    }
+    .auth-card .form-control {
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+    }
+    .auth-card .form-control:focus {
+        border-color: var(--green-primary);
+        box-shadow: 0 0 0 3px rgba(46,125,50,0.15);
+    }
+    .auth-card .btn-success {
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        font-weight: 600;
+        background: var(--green-primary);
+        border: none;
+        transition: var(--transition);
+    }
+    .auth-card .btn-success:hover {
+        background: var(--green-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(46,125,50,0.3);
+    }
+    .auth-card .auth-link {
+        text-align: center;
+        margin-top: 20px;
+        color: var(--text-secondary);
+    }
+    .auth-card .auth-link a {
+        color: var(--green-primary);
+        font-weight: 600;
+    }
+    .auth-card .auth-link a:hover { text-decoration: underline; }
+    .errorlist {
+        color: #dc3545;
+        list-style: none;
+        padding: 0;
+        font-size: 13px;
+    }
+    .errorlist li { margin-bottom: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="logo">
+        <i class="fas fa-leaf"></i> GoodDeeds
+    </div>
+    <p class="subtitle">Join the community of changemakers</p>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label fw-bold">Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+            {% if form.username.errors %}<div class="errorlist">{{ form.username.errors }}</div>{% endif %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Email</label>
+            <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+            {% if form.email.errors %}<div class="errorlist">{{ form.email.errors }}</div>{% endif %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Password</label>
+            <input type="password" name="password1" class="form-control" placeholder="Create a password" required>
+            <small class="text-muted">Must be at least 8 characters</small>
+            {% if form.password1.errors %}<div class="errorlist">{{ form.password1.errors }}</div>{% endif %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Confirm Password</label>
+            <input type="password" name="password2" class="form-control" placeholder="Confirm your password" required>
+            {% if form.password2.errors %}<div class="errorlist">{{ form.password2.errors }}</div>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-success w-100">
+            <i class="fas fa-user-plus me-2"></i> Create Account
+        </button>
+    </form>
+
+    <div class="auth-link">
+        Already have an account? <a href="{% url 'login' %}">Login</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,669 +1,424 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoodDeeds – Dashboard</title>
+{% extends 'base.html' %}
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+{% block title %}Dashboard – GoodDeeds{% endblock %}
 
-    <style>
-        /* ============================================================
-           CSS VARIABLES (Light / Dark)
-           ============================================================ */
-        :root {
-            --bg: #fafafa;
-            --card-bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #8e8e8e;
-            --border: #dbdbdb;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
-            --header-gradient: linear-gradient(135deg, #0d2b1b, #1a4d2e, #2e7d32);
-            --green-primary: #2e7d32;
-            --green-light: #e8f5e9;
-            --green-dark: #1b5e20;
-            --radius: 16px;
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+{% block extra_css %}
+<style>
+    /* Dashboard specific styles */
+    .stories-wrapper {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .stories-wrapper::-webkit-scrollbar { display: none; }
+    .story-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: transform 0.2s;
+    }
+    .story-item:hover { transform: translateY(-2px); }
+    .story-ring {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        padding: 2px;
+        background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        transition: transform 0.2s;
+    }
+    .story-ring:hover { transform: scale(1.05); }
+    .story-ring img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid var(--card-bg);
+        object-fit: cover;
+    }
+    .story-ring.add-story {
+        background: var(--border);
+    }
+    .story-ring.add-story .add-icon {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: var(--bg);
+        border: 2px solid var(--card-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: var(--text-secondary);
+    }
+    .story-name {
+        font-size: 11px;
+        margin-top: 6px;
+        color: var(--text-secondary);
+        max-width: 64px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 500;
+    }
 
-        body.dark {
-            --bg: #000000;
-            --card-bg: #121212;
-            --text: #f5f5f5;
-            --text-secondary: #a8a8a8;
-            --border: #262626;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.6);
-            --green-light: #1a3a1a;
-        }
+    .tab-bar {
+        display: flex;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 4px;
+        margin-bottom: 20px;
+    }
+    .tab-btn {
+        flex: 1;
+        padding: 10px 0;
+        text-align: center;
+        border: none;
+        background: transparent;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text-secondary);
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    .tab-btn i { margin-right: 6px; font-size: 15px; }
+    .tab-btn.active {
+        background: var(--green-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+    }
+    .tab-btn:not(.active):hover { background: rgba(0,0,0,0.04); }
+    body.dark .tab-btn:not(.active):hover { background: rgba(255,255,255,0.06); }
 
-        /* ============================================================
-           RESET & BASE
-           ============================================================ */
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            transition: background 0.3s, color 0.3s;
-            padding-top: 70px; /* space for fixed header */
-        }
-        a { text-decoration: none; color: var(--green-primary); }
-        a:hover { color: var(--green-dark); }
+    /* post card etc. – include from previous version */
+    .post-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: var(--transition);
+    }
+    .post-card:hover {
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-2px);
+    }
+    .post-header {
+        display: flex;
+        align-items: center;
+        padding: 14px 16px;
+    }
+    .post-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 12px;
+        border: 2px solid var(--border);
+    }
+    .post-user {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--text);
+        flex: 1;
+    }
+    .post-user:hover { text-decoration: underline; }
+    .post-time {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-left: 8px;
+    }
+    .post-more {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 18px;
+        padding: 0 4px;
+        cursor: pointer;
+    }
+    .post-more:hover { color: var(--text); }
 
-        /* ============================================================
-           HEADER (Fixed, Instagram-style)
-           ============================================================ */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1050;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 0;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: background 0.3s, border-color 0.3s;
-        }
-        .header .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--text);
-            letter-spacing: -0.5px;
-        }
-        .logo i {
-            color: var(--green-primary);
-            margin-right: 4px;
-        }
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .header-actions .btn-icon {
-            background: transparent;
-            border: none;
-            color: var(--text);
-            font-size: 22px;
-            padding: 4px 8px;
-            border-radius: 50%;
-            transition: background 0.2s;
-            position: relative;
-        }
-        .header-actions .btn-icon:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .header-actions .btn-icon .badge-dot {
-            position: absolute;
-            top: 2px;
-            right: 4px;
-            width: 10px;
-            height: 10px;
-            background: #ed4956;
-            border-radius: 50%;
-            border: 2px solid var(--card-bg);
-        }
-        .avatar-small {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border);
-            transition: border-color 0.2s;
-            cursor: pointer;
-        }
-        .avatar-small:hover {
-            border-color: var(--green-primary);
-        }
+    .post-image-wrapper {
+        position: relative;
+        background: var(--bg);
+        overflow: hidden;
+    }
+    .post-image {
+        width: 100%;
+        max-height: 600px;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.4s;
+    }
+    .post-card:hover .post-image { transform: scale(1.01); }
 
-        .create-btn-mobile {
-            background: linear-gradient(135deg, var(--green-primary), var(--green-dark));
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 6px 18px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-        .create-btn-mobile:hover {
-            transform: scale(1.04);
-            box-shadow: 0 4px 16px rgba(46, 125, 50, 0.35);
-            color: white;
-        }
+    .verification-overlay {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 4px 14px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .verification-overlay.verified { background: rgba(46,125,50,0.85); }
+    .verification-overlay.pending { background: rgba(255,179,0,0.85); }
 
-        /* ============================================================
-           STORIES ROW (Instagram-style)
-           ============================================================ */
-        .stories-wrapper {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-        .stories-wrapper::-webkit-scrollbar {
-            display: none;
-        }
-        .story-item {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .story-ring {
-            width: 62px;
-            height: 62px;
-            border-radius: 50%;
-            padding: 2px;
-            background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            transition: transform 0.2s;
-        }
-        .story-ring:hover {
-            transform: scale(1.05);
-        }
-        .story-ring img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 2px solid var(--card-bg);
-            object-fit: cover;
-        }
-        .story-ring.add-story {
-            background: var(--border);
-        }
-        .story-ring.add-story .add-icon {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: var(--bg);
-            border: 2px solid var(--card-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: var(--text-secondary);
-        }
-        .story-name {
-            font-size: 11px;
-            margin-top: 6px;
-            color: var(--text-secondary);
-            max-width: 62px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+    .points-overlay {
+        position: absolute;
+        bottom: 14px;
+        left: 14px;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(8px);
+        padding: 4px 16px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #a5d6a7;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .points-overlay i { color: #66bb6a; }
 
-        /* ============================================================
-           TAB BAR (Instagram-style)
-           ============================================================ */
-        .tab-bar {
-            display: flex;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 4px;
-            margin-bottom: 20px;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 10px 0;
-            text-align: center;
-            border: none;
-            background: transparent;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--text-secondary);
-            transition: var(--transition);
-            position: relative;
-        }
-        .tab-btn i {
-            margin-right: 6px;
-            font-size: 14px;
-        }
-        .tab-btn.active {
-            background: var(--green-primary);
-            color: white;
-            box-shadow: 0 2px 12px rgba(46, 125, 50, 0.25);
-        }
-        .tab-btn:hover:not(.active) {
-            background: rgba(0, 0, 0, 0.04);
-        }
+    .post-actions {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        gap: 18px;
+    }
+    .post-actions .action-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--text);
+        padding: 6px;
+        transition: var(--transition);
+        cursor: pointer;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .post-actions .action-btn:hover {
+        background: rgba(0,0,0,0.06);
+        transform: scale(1.1);
+    }
+    body.dark .post-actions .action-btn:hover {
+        background: rgba(255,255,255,0.08);
+    }
+    .post-actions .action-btn.liked {
+        color: #ed4956;
+    }
+    .post-actions .action-btn.liked:hover {
+        background: #fde8e8;
+    }
+    .post-actions .action-spacer { flex: 1; }
 
-        /* ============================================================
-           POST CARD (Instagram-style)
-           ============================================================ */
-        .post-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 24px;
-            overflow: hidden;
-            transition: var(--transition);
-        }
-        .post-card:hover {
-            box-shadow: var(--shadow-hover);
-            transform: translateY(-2px);
-        }
+    .post-meta {
+        padding: 0 16px 4px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+    .post-meta .like-count {
+        font-weight: 600;
+        color: var(--text);
+    }
 
-        /* Post Header */
-        .post-header {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-        }
-        .post-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 12px;
-            border: 2px solid var(--border);
-        }
-        .post-user {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text);
-            flex: 1;
-        }
-        .post-user:hover {
-            text-decoration: underline;
-        }
-        .post-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-left: 8px;
-        }
-        .post-more {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 18px;
-            padding: 0 4px;
-            cursor: pointer;
-        }
-        .post-more:hover {
-            color: var(--text);
-        }
+    .post-caption {
+        padding: 0 16px 8px;
+    }
+    .post-caption .username {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text);
+    }
+    .post-caption .caption-text {
+        font-size: 14px;
+        color: var(--text);
+        margin-left: 4px;
+    }
+    .post-caption .caption-text .hashtag {
+        color: #0095f6;
+        font-weight: 500;
+    }
+    .post-caption .caption-text .hashtag:hover { text-decoration: underline; }
 
-        /* Post Image */
-        .post-image-wrapper {
-            position: relative;
-            background: var(--bg);
-        }
-        .post-image {
-            width: 100%;
-            max-height: 600px;
-            object-fit: cover;
-            display: block;
-        }
+    .post-comments {
+        padding: 0 16px 8px;
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+    .post-comments .comment .cm-username {
+        font-weight: 600;
+        color: var(--text);
+        margin-right: 4px;
+    }
+    .post-comments .view-all {
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .post-comments .view-all:hover { color: var(--text); }
 
-        /* Verification Badge Overlay */
-        .verification-overlay {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(6px);
-            padding: 4px 14px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .verification-overlay.verified {
-            background: rgba(46, 125, 50, 0.85);
-        }
-        .verification-overlay.pending {
-            background: rgba(255, 179, 0, 0.85);
-        }
+    .post-timestamp {
+        padding: 0 16px 12px;
+        font-size: 11px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-        /* Points Badge Overlay */
-        .points-overlay {
-            position: absolute;
-            bottom: 12px;
-            left: 12px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(6px);
-            padding: 4px 16px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #a5d6a7;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .points-overlay i {
-            color: #66bb6a;
-        }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+    }
+    .empty-state .icon-wrapper {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: var(--green-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    .empty-state .icon-wrapper i {
+        font-size: 44px;
+        color: var(--green-primary);
+    }
+    .empty-state h4 {
+        font-weight: 700;
+        font-size: 22px;
+        color: var(--text);
+    }
+    .empty-state p {
+        color: var(--text-secondary);
+        max-width: 380px;
+        margin: 8px auto 24px;
+    }
+    .empty-state .btn-primary {
+        background: var(--green-primary);
+        border: none;
+        border-radius: 30px;
+        padding: 12px 40px;
+        font-weight: 600;
+        transition: var(--transition);
+        color: white;
+    }
+    .empty-state .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(46,125,50,0.35);
+        background: var(--green-dark);
+    }
 
-        /* Post Actions (Instagram-style bar) */
-        .post-actions {
-            display: flex;
-            align-items: center;
-            padding: 8px 16px;
-            gap: 16px;
-        }
-        .post-actions .action-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text);
-            padding: 4px;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-        .post-actions .action-btn:hover {
-            transform: scale(1.1);
-        }
-        .post-actions .action-btn.liked {
-            color: #ed4956;
-        }
-        .post-actions .action-btn.bookmarked {
-            color: var(--green-primary);
-        }
-        .post-actions .action-spacer {
-            flex: 1;
-        }
+    .loading-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .loading-state .leaf-spin {
+        font-size: 48px;
+        color: var(--green-primary);
+        animation: spin 1.2s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state p {
+        color: var(--text-secondary);
+        margin-top: 12px;
+        font-weight: 500;
+    }
 
-        /* Post Caption */
-        .post-caption {
-            padding: 0 16px 8px;
-        }
-        .post-caption .username {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text);
-        }
-        .post-caption .caption-text {
-            font-size: 14px;
-            color: var(--text);
-            margin-left: 4px;
-        }
-        .post-caption .caption-text .hashtag {
-            color: #0095f6;
-            font-weight: 500;
-        }
-        .post-caption .caption-text .hashtag:hover {
-            text-decoration: underline;
-        }
+    .fade-in {
+        animation: fadeUp 0.5s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-        /* Post Meta */
-        .post-meta {
-            padding: 4px 16px 12px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-        .post-meta .like-count {
-            font-weight: 600;
-            color: var(--text);
-        }
+    .modal-content {
+        border-radius: 28px;
+        border: none;
+        background: var(--card-bg);
+        color: var(--text);
+        box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+        border-bottom: 1px solid var(--border);
+        padding: 24px 28px 16px;
+    }
+    .modal-header .btn-close {
+        filter: var(--btn-close-filter, none);
+    }
+    body.dark .modal-header .btn-close { filter: invert(1); }
+    .modal-body { padding: 24px 28px; }
+    .modal-footer {
+        border-top: 1px solid var(--border);
+        padding: 16px 28px 24px;
+    }
+    .modal .form-control {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        transition: var(--transition);
+    }
+    .modal .form-control:focus {
+        border-color: var(--green-primary);
+        box-shadow: 0 0 0 3px rgba(46,125,50,0.15);
+    }
+    .modal .form-label {
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
 
-        /* Comments Preview */
-        .post-comments {
-            padding: 0 16px 12px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-        .post-comments .comment {
-            margin-bottom: 4px;
-        }
-        .post-comments .comment .cm-username {
-            font-weight: 600;
-            color: var(--text);
-            margin-right: 4px;
-        }
-        .post-comments .view-all {
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .post-comments .view-all:hover {
-            color: var(--text);
-        }
+    @media (max-width: 576px) {
+        .story-ring { width: 54px; height: 54px; }
+        .post-actions .action-btn { font-size: 20px; width: 38px; height: 38px; }
+        .post-image { max-height: 400px; }
+        .tab-btn { font-size: 12px; padding: 8px 0; }
+        .tab-btn i { margin-right: 4px; }
+        .empty-state { padding: 40px 16px; }
+    }
+</style>
+{% endblock %}
 
-        /* Post Timestamp */
-        .post-timestamp {
-            padding: 0 16px 12px;
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        /* ============================================================
-           EMPTY STATE
-           ============================================================ */
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-        }
-        .empty-state .icon-wrapper {
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-            background: var(--green-light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-        }
-        .empty-state .icon-wrapper i {
-            font-size: 44px;
-            color: var(--green-primary);
-        }
-        .empty-state h4 {
-            font-weight: 700;
-            font-size: 22px;
-            color: var(--text);
-        }
-        .empty-state p {
-            color: var(--text-secondary);
-            max-width: 380px;
-            margin: 8px auto 24px;
-        }
-        .empty-state .btn-primary {
-            background: var(--green-primary);
-            border: none;
-            border-radius: 30px;
-            padding: 10px 36px;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        .empty-state .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(46, 125, 50, 0.35);
-            background: var(--green-dark);
-        }
-
-        /* ============================================================
-           LOADING
-           ============================================================ */
-        .loading-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        .loading-state .leaf-spin {
-            font-size: 48px;
-            color: var(--green-primary);
-            animation: spin 1.2s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .loading-state p {
-            color: var(--text-secondary);
-            margin-top: 12px;
-        }
-
-        /* ============================================================
-           MODAL (Instagram-style)
-           ============================================================ */
-        .modal-content {
-            border-radius: 20px;
-            border: none;
-            background: var(--card-bg);
-            color: var(--text);
-        }
-        .modal-header {
-            border-bottom: 1px solid var(--border);
-            padding: 20px 24px;
-        }
-        .modal-header .btn-close {
-            filter: var(--btn-close-filter, none);
-        }
-        body.dark .modal-header .btn-close {
-            filter: invert(1);
-        }
-        .modal-body {
-            padding: 24px;
-        }
-        .modal-footer {
-            border-top: 1px solid var(--border);
-            padding: 16px 24px 24px;
-        }
-        .modal .form-control {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 12px;
-            padding: 12px 16px;
-            transition: var(--transition);
-        }
-        .modal .form-control:focus {
-            border-color: var(--green-primary);
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
-        }
-        .modal .form-label {
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
-        @media (max-width: 576px) {
-            body { padding-top: 60px; }
-            .logo { font-size: 20px; }
-            .header .container { padding: 0 12px; }
-            .create-btn-mobile { padding: 4px 14px; font-size: 12px; }
-            .header-actions .btn-icon { font-size: 18px; }
-            .story-ring { width: 52px; height: 52px; }
-            .story-item { margin-right: 12px; }
-            .post-actions .action-btn { font-size: 20px; }
-            .post-image { max-height: 400px; }
-            .tab-btn { font-size: 12px; padding: 8px 0; }
-            .tab-btn i { margin-right: 4px; }
-            .empty-state { padding: 40px 16px; }
-            .empty-state .icon-wrapper { width: 72px; height: 72px; }
-            .empty-state .icon-wrapper i { font-size: 32px; }
-        }
-
-        @media (min-width: 768px) {
-            .container { max-width: 640px; }
-        }
-
-        /* ============================================================
-           FADE-IN ANIMATION
-           ============================================================ */
-        .fade-in {
-            animation: fadeUp 0.5s ease both;
-        }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ============================================================
-           SCROLLBAR STYLING
-           ============================================================ */
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
-        }
-    </style>
-</head>
-<body>
-
-<!-- ============================================================
-     HEADER (Fixed, Instagram-style)
-     ============================================================ -->
-<header class="header">
-    <div class="container">
-        <div class="logo">
-            <i class="fas fa-leaf"></i> GoodDeeds
-        </div>
-        <div class="header-actions">
-            <button class="btn-icon" id="darkModeToggle" title="Toggle dark mode">
-                <i class="fas fa-moon"></i>
-            </button>
-            <button class="create-btn-mobile d-sm-none" data-bs-toggle="modal" data-bs-target="#createModal">
-                <i class="fas fa-plus"></i>
-            </button>
-            <button class="btn-icon d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#createModal" title="Create post">
-                <i class="fas fa-plus-square"></i>
-            </button>
-            <button class="btn-icon" title="Notifications">
-                <i class="fas fa-heart"></i>
-                <span class="badge-dot"></span>
-            </button>
-            <img src="https://ui-avatars.com/api/?name=User&background=2e7d32&color=fff&size=34" class="avatar-small" alt="Profile">
-        </div>
-    </div>
-</header>
-
-<!-- ============================================================
-     MAIN CONTENT
-     ============================================================ -->
-<main class="container py-3">
-
-    <!-- ===== STORIES ROW (Dynamic) ===== -->
+{% block content %}
+    <!-- Stories Row -->
     <div class="stories-wrapper" id="storiesContainer">
-        <div class="loading-state" style="padding:10px;text-align:center;color:var(--text-secondary);width:100%;">
+        <div class="loading-state" style="padding:8px;text-align:center;color:var(--text-secondary);width:100%;font-size:14px;">
             <i class="fas fa-spinner fa-spin"></i> Loading stories...
         </div>
     </div>
 
-    <!-- ===== TAB BAR ===== -->
+    <!-- Tab Bar -->
     <div class="tab-bar" id="tabContainer">
         <button class="tab-btn active" data-type="all">
             <i class="fas fa-home"></i> For You
@@ -676,7 +431,7 @@
         </button>
     </div>
 
-    <!-- ===== FEED ===== -->
+    <!-- Feed -->
     <div id="feedContainer">
         <div class="loading-state">
             <i class="fas fa-leaf leaf-spin"></i>
@@ -684,498 +439,345 @@
         </div>
     </div>
 
-</main>
-
-<!-- ============================================================
-     CREATE POST MODAL
-     ============================================================ -->
-<div class="modal fade" id="createModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-leaf text-success me-2"></i>Share Your Good Deed</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">What did you do?</label>
-                    <textarea class="form-control" id="caption" rows="3" placeholder="Planted trees, cleaned a beach, donated food..."></textarea>
+    <!-- Create Post Modal -->
+    <div class="modal fade" id="createModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-leaf text-success me-2"></i>Share Your Good Deed</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Location</label>
-                    <input class="form-control" id="location" placeholder="Where did this happen?">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">What did you do?</label>
+                        <textarea class="form-control" id="caption" rows="3" placeholder="Planted trees, cleaned a beach, donated food..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <input class="form-control" id="location" placeholder="Where did this happen?">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hashtags</label>
+                        <input class="form-control" id="hashtags" placeholder="e.g., CleanBeach PlantATree">
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Image URL</label>
+                        <input class="form-control" id="imageUrl" value="https://picsum.photos/800/600">
+                        <small class="text-muted">Paste an image URL or leave the default.</small>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Hashtags</label>
-                    <input class="form-control" id="hashtags" placeholder="e.g., CleanBeach PlantATree">
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-success" onclick="createPost()">
+                        <i class="fas fa-leaf me-1"></i> Share
+                    </button>
                 </div>
-                <div class="mb-0">
-                    <label class="form-label">Image URL</label>
-                    <input class="form-control" id="imageUrl" value="https://picsum.photos/800/600">
-                    <small class="text-muted">Paste an image URL or leave the default.</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-success" onclick="createPost()">
-                    <i class="fas fa-leaf me-1"></i> Share
-                </button>
             </div>
         </div>
     </div>
-</div>
+{% endblock %}
 
-<!-- ============================================================
-     SCRIPTS
-     ============================================================ -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // ============================================================
-    // CONFIG
-    // ============================================================
-    const API_BASE = '/api';
+{% block extra_js %}
+    <script>
+        // Dashboard-specific JavaScript
+        const API_BASE = '/api';
+        const feedContainer = document.getElementById('feedContainer');
+        const storiesContainer = document.getElementById('storiesContainer');
+        const tabContainer = document.getElementById('tabContainer');
 
-    // ============================================================
-    // DOM REFS
-    // ============================================================
-    const feedContainer = document.getElementById('feedContainer');
-    const storiesContainer = document.getElementById('storiesContainer');
-    const tabContainer = document.getElementById('tabContainer');
-    const darkToggle = document.getElementById('darkModeToggle');
-
-    // ============================================================
-    // DARK MODE
-    // ============================================================
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark');
-        darkToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
-    }
-    darkToggle.addEventListener('click', function() {
-        document.body.classList.toggle('dark');
-        const isDark = document.body.classList.contains('dark');
-        localStorage.setItem('darkMode', isDark);
-        const icon = this.querySelector('i');
-        icon.classList.toggle('fa-moon');
-        icon.classList.toggle('fa-sun');
-    });
-
-    // ============================================================
-    // LOAD STORIES (Dynamic)
-    // ============================================================
-    function loadStories() {
-        fetch(`${API_BASE}/users/`)
-            .then(res => {
-                if (!res.ok) throw new Error('API error');
-                return res.json();
-            })
-            .then(users => {
-                if (users.length === 0) {
-                    // If no users, show a default "You" story
-                    storiesContainer.innerHTML = `
-                        <div class="story-item" onclick="alert('Your profile')">
-                            <div class="story-ring"><img src="https://ui-avatars.com/api/?name=You&background=2e7d32&color=fff&size=62" alt="You"></div>
-                            <span class="story-name">You</span>
-                        </div>
-                        <div class="story-item" onclick="alert('Add Story coming soon!')">
-                            <div class="story-ring add-story">
-                                <div class="add-icon"><i class="fas fa-plus"></i></div>
+        // Load stories
+        function loadStories() {
+            fetch(`${API_BASE}/users/`)
+                .then(res => { if (!res.ok) throw new Error('API error'); return res.json(); })
+                .then(users => {
+                    if (users.length === 0) {
+                        storiesContainer.innerHTML = `
+                            <div class="story-item" onclick="alert('Your profile')">
+                                <div class="story-ring"><img src="https://ui-avatars.com/api/?name=You&background=2e7d32&color=fff&size=64" alt="You"></div>
+                                <span class="story-name">You</span>
                             </div>
+                            <div class="story-item" onclick="alert('Add Story coming soon!')">
+                                <div class="story-ring add-story"><div class="add-icon"><i class="fas fa-plus"></i></div></div>
+                                <span class="story-name">Add</span>
+                            </div>
+                        `;
+                        return;
+                    }
+                    const storiesHtml = users.slice(0, 10).map(user => `
+                        <div class="story-item" onclick="alert('View ${user.username}\'s profile')">
+                            <div class="story-ring">
+                                <img src="${user.profile_pic || 'https://ui-avatars.com/api/?name=' + user.username + '&background=2e7d32&color=fff&size=64'}" alt="${user.username}">
+                            </div>
+                            <span class="story-name">${user.username}</span>
+                        </div>
+                    `).join('');
+                    storiesContainer.innerHTML = `
+                        ${storiesHtml}
+                        <div class="story-item" onclick="alert('Add Story coming soon!')">
+                            <div class="story-ring add-story"><div class="add-icon"><i class="fas fa-plus"></i></div></div>
                             <span class="story-name">Add</span>
                         </div>
                     `;
-                    return;
-                }
-                // Limit to first 10 users for display
-                const storiesHtml = users.slice(0, 10).map(user => `
-                    <div class="story-item" onclick="alert('View ${user.username}\'s profile')">
-                        <div class="story-ring">
-                            <img src="${user.profile_pic || 'https://ui-avatars.com/api/?name=' + user.username + '&background=2e7d32&color=fff&size=62'}" alt="${user.username}">
-                        </div>
-                        <span class="story-name">${user.username}</span>
-                    </div>
-                `).join('');
-
-                // Add an "Add Story" button at the end
-                storiesContainer.innerHTML = `
-                    ${storiesHtml}
-                    <div class="story-item" onclick="alert('Add Story feature coming soon!')">
-                        <div class="story-ring add-story">
-                            <div class="add-icon"><i class="fas fa-plus"></i></div>
-                        </div>
-                        <span class="story-name">Add</span>
-                    </div>
-                `;
-            })
-            .catch(err => {
-                console.warn('Stories API error, using fallback:', err);
-                // Fallback to static mock stories
-                storiesContainer.innerHTML = `
-                    <div class="story-item" onclick="alert('Your profile')">
-                        <div class="story-ring"><img src="https://ui-avatars.com/api/?name=You&background=2e7d32&color=fff&size=62" alt="You"></div>
-                        <span class="story-name">You</span>
-                    </div>
-                    <div class="story-item" onclick="alert('View Alice')">
-                        <div class="story-ring"><img src="https://ui-avatars.com/api/?name=Alice&background=2196F3&color=fff&size=62" alt="Alice"></div>
-                        <span class="story-name">Alice</span>
-                    </div>
-                    <div class="story-item" onclick="alert('View Bob')">
-                        <div class="story-ring"><img src="https://ui-avatars.com/api/?name=Bob&background=FF9800&color=fff&size=62" alt="Bob"></div>
-                        <span class="story-name">Bob</span>
-                    </div>
-                    <div class="story-item" onclick="alert('View Carol')">
-                        <div class="story-ring"><img src="https://ui-avatars.com/api/?name=Carol&background=4CAF50&color=fff&size=62" alt="Carol"></div>
-                        <span class="story-name">Carol</span>
-                    </div>
-                    <div class="story-item" onclick="alert('View Dave')">
-                        <div class="story-ring"><img src="https://ui-avatars.com/api/?name=Dave&background=F44336&color=fff&size=62" alt="Dave"></div>
-                        <span class="story-name">Dave</span>
-                    </div>
-                    <div class="story-item" onclick="alert('Add Story coming soon!')">
-                        <div class="story-ring add-story">
-                            <div class="add-icon"><i class="fas fa-plus"></i></div>
-                        </div>
-                        <span class="story-name">Add</span>
-                    </div>
-                `;
-            });
-    }
-
-    // ============================================================
-    // LOAD FEED
-    // ============================================================
-    function loadFeed(type = 'all') {
-        // Update active tab
-        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-        const activeTab = document.querySelector(`.tab-btn[data-type="${type}"]`);
-        if (activeTab) activeTab.classList.add('active');
-
-        feedContainer.innerHTML = `
-            <div class="loading-state">
-                <i class="fas fa-leaf leaf-spin"></i>
-                <p>Loading good deeds...</p>
-            </div>
-        `;
-
-        fetch(`${API_BASE}/feed/?type=${type}`)
-            .then(res => {
-                if (!res.ok) throw new Error('API error');
-                return res.json();
-            })
-            .then(data => {
-                if (data.length === 0) {
-                    renderEmptyState();
-                } else {
-                    renderPosts(data);
-                }
-            })
-            .catch(err => {
-                console.warn('Feed API error, using mock data:', err);
-                renderMockPosts();
-            });
-    }
-
-    // ============================================================
-    // RENDER POSTS
-    // ============================================================
-    function renderPosts(posts) {
-        if (!posts || posts.length === 0) {
-            renderEmptyState();
-            return;
+                })
+                .catch(() => {
+                    // fallback
+                    storiesContainer.innerHTML = `
+                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=You&background=2e7d32&color=fff&size=64"></div><span class="story-name">You</span></div>
+                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Alice&background=2196F3&color=fff&size=64"></div><span class="story-name">Alice</span></div>
+                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Bob&background=FF9800&color=fff&size=64"></div><span class="story-name">Bob</span></div>
+                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Carol&background=4CAF50&color=fff&size=64"></div><span class="story-name">Carol</span></div>
+                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Dave&background=F44336&color=fff&size=64"></div><span class="story-name">Dave</span></div>
+                        <div class="story-item"><div class="story-ring add-story"><div class="add-icon"><i class="fas fa-plus"></i></div></div><span class="story-name">Add</span></div>
+                    `;
+                });
         }
 
-        feedContainer.innerHTML = posts.map(post => {
-            const isVerified = post.is_verified;
-            const badgeClass = isVerified ? 'verified' : 'pending';
-            const badgeIcon = isVerified ? 'fa-check-circle' : 'fa-clock';
-            const badgeText = isVerified ? 'Verified' : 'Pending';
+        // Load feed
+        function loadFeed(type = 'all') {
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            const activeTab = document.querySelector(`.tab-btn[data-type="${type}"]`);
+            if (activeTab) activeTab.classList.add('active');
 
-            return `
-                <div class="post-card fade-in">
-                    <!-- Post Header -->
-                    <div class="post-header">
-                        <img src="https://ui-avatars.com/api/?name=${post.username || 'User'}&background=2e7d32&color=fff&size=38"
-                             class="post-avatar" alt="${post.username}">
-                        <span class="post-user">${post.username || 'Anonymous'}</span>
-                        <span class="post-time">• ${timeAgo(post.created_at)}</span>
-                        <button class="post-more"><i class="fas fa-ellipsis-h"></i></button>
-                    </div>
-
-                    <!-- Post Image -->
-                    <div class="post-image-wrapper">
-                        <img src="${post.image_url || 'https://picsum.photos/800/600'}" class="post-image" alt="Post"
-                             onerror="this.src='https://picsum.photos/800/600'">
-                        <div class="verification-overlay ${badgeClass}">
-                            <i class="fas ${badgeIcon}"></i> ${badgeText}
-                        </div>
-                        ${post.points > 0 ? `
-                            <div class="points-overlay">
-                                <i class="fas fa-leaf"></i> +${post.points} pts
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    <!-- Post Actions -->
-                    <div class="post-actions">
-                        <button class="action-btn" onclick="likePost('${post.id}', this)">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="action-btn" onclick="alert('Comments coming soon!')">
-                            <i class="far fa-comment"></i>
-                        </button>
-                        <button class="action-btn" onclick="alert('Share coming soon!')">
-                            <i class="far fa-paper-plane"></i>
-                        </button>
-                        <span class="action-spacer"></span>
-                        <button class="action-btn" onclick="verifyPost('${post.id}')" title="Verify with AI">
-                            <i class="fas fa-shield-alt"></i>
-                        </button>
-                        <button class="action-btn" onclick="alert('Saved!')">
-                            <i class="far fa-bookmark"></i>
-                        </button>
-                    </div>
-
-                    <!-- Likes -->
-                    <div class="post-meta">
-                        <span class="like-count">${post.likes || 0}</span> likes
-                    </div>
-
-                    <!-- Caption -->
-                    <div class="post-caption">
-                        <span class="username">${post.username || 'Anonymous'}</span>
-                        <span class="caption-text">
-                            ${post.caption || ''}
-                            ${post.hashtags ? post.hashtags.split(',').map(t =>
-                                ` <a href="#" class="hashtag">#${t.trim()}</a>`
-                            ).join('') : ''}
-                        </span>
-                    </div>
-
-                    <!-- Comments Preview -->
-                    ${post.comments_count > 0 ? `
-                        <div class="post-comments">
-                            <div class="comment">
-                                <span class="cm-username">${post.username || 'User'}</span>
-                                <span>${post.caption ? post.caption.split(' ').slice(0, 8).join(' ') + '...' : ''}</span>
-                            </div>
-                            <span class="view-all">View all ${post.comments_count} comments</span>
-                        </div>
-                    ` : ''}
-
-                    <!-- Timestamp -->
-                    <div class="post-timestamp">${new Date(post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</div>
+            feedContainer.innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-leaf leaf-spin"></i>
+                    <p>Loading good deeds...</p>
                 </div>
             `;
-        }).join('');
-    }
 
-    // ============================================================
-    // EMPTY STATE
-    // ============================================================
-    function renderEmptyState() {
-        feedContainer.innerHTML = `
-            <div class="empty-state fade-in">
-                <div class="icon-wrapper">
-                    <i class="fas fa-leaf"></i>
+            fetch(`${API_BASE}/feed/?type=${type}`)
+                .then(res => { if (!res.ok) throw new Error('API error'); return res.json(); })
+                .then(data => {
+                    if (data.length === 0) renderEmptyState();
+                    else renderPosts(data);
+                })
+                .catch(() => renderMockPosts());
+        }
+
+        function renderPosts(posts) {
+            if (!posts || posts.length === 0) { renderEmptyState(); return; }
+
+            feedContainer.innerHTML = posts.map(post => {
+                const isVerified = post.is_verified;
+                const badgeClass = isVerified ? 'verified' : 'pending';
+                const badgeIcon = isVerified ? 'fa-check-circle' : 'fa-clock';
+                const badgeText = isVerified ? 'Verified' : 'Pending';
+
+                return `
+                    <div class="post-card fade-in">
+                        <div class="post-header">
+                            <img src="https://ui-avatars.com/api/?name=${post.username || 'User'}&background=2e7d32&color=fff&size=40"
+                                 class="post-avatar" alt="${post.username}">
+                            <span class="post-user">${post.username || 'Anonymous'}</span>
+                            <span class="post-time">• ${timeAgo(post.created_at)}</span>
+                            <button class="post-more"><i class="fas fa-ellipsis-h"></i></button>
+                        </div>
+
+                        <div class="post-image-wrapper">
+                            <img src="${post.image_url || 'https://picsum.photos/800/600'}" class="post-image" alt="Post"
+                                 onerror="this.src='https://picsum.photos/800/600'">
+                            <div class="verification-overlay ${badgeClass}">
+                                <i class="fas ${badgeIcon}"></i> ${badgeText}
+                            </div>
+                            ${post.points > 0 ? `
+                                <div class="points-overlay">
+                                    <i class="fas fa-leaf"></i> +${post.points} pts
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="post-actions">
+                            <button class="action-btn" onclick="likePost('${post.id}', this)">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <button class="action-btn" onclick="alert('Comments coming soon!')">
+                                <i class="far fa-comment"></i>
+                            </button>
+                            <button class="action-btn" onclick="alert('Share coming soon!')">
+                                <i class="far fa-paper-plane"></i>
+                            </button>
+                            <span class="action-spacer"></span>
+                            <button class="action-btn" onclick="verifyPost('${post.id}')" title="Verify with AI">
+                                <i class="fas fa-shield-alt"></i>
+                            </button>
+                            <button class="action-btn" onclick="alert('Saved!')">
+                                <i class="far fa-bookmark"></i>
+                            </button>
+                        </div>
+
+                        <div class="post-meta">
+                            <span class="like-count">${post.likes || 0}</span> likes
+                        </div>
+
+                        <div class="post-caption">
+                            <span class="username">${post.username || 'Anonymous'}</span>
+                            <span class="caption-text">
+                                ${post.caption || ''}
+                                ${post.hashtags ? post.hashtags.split(',').map(t =>
+                                    ` <a href="#" class="hashtag">#${t.trim()}</a>`
+                                ).join('') : ''}
+                            </span>
+                        </div>
+
+                        ${post.comments_count > 0 ? `
+                            <div class="post-comments">
+                                <div class="comment">
+                                    <span class="cm-username">${post.username || 'User'}</span>
+                                    <span>${post.caption ? post.caption.split(' ').slice(0, 8).join(' ') + '...' : ''}</span>
+                                </div>
+                                <span class="view-all">View all ${post.comments_count} comments</span>
+                            </div>
+                        ` : ''}
+
+                        <div class="post-timestamp">${new Date(post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderEmptyState() {
+            feedContainer.innerHTML = `
+                <div class="empty-state fade-in">
+                    <div class="icon-wrapper"><i class="fas fa-leaf"></i></div>
+                    <h4>No good deeds yet</h4>
+                    <p>Be the first to share a positive impact and inspire others.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                        <i class="fas fa-plus me-1"></i> Create First Post
+                    </button>
                 </div>
-                <h4>No good deeds yet</h4>
-                <p>Be the first to share a positive impact and inspire others.</p>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
-                    <i class="fas fa-plus me-1"></i> Create First Post
-                </button>
-            </div>
-        `;
-    }
-
-    // ============================================================
-    // MOCK DATA (Fallback)
-    // ============================================================
-    function renderMockPosts() {
-        const mockPosts = [
-            {
-                id: '1',
-                username: 'EcoWarrior',
-                image_url: 'https://picsum.photos/seed/tree/800/600',
-                caption: 'Planted 50 trees in our community park! 🌳 Every tree counts toward a greener future.',
-                hashtags: 'GreenEarth, PlantATree, ClimateAction',
-                location: 'Central Park, NYC',
-                is_verified: true,
-                points: 25,
-                likes: 45,
-                comments_count: 12,
-                shares: 8,
-                created_at: new Date(Date.now() - 3600000).toISOString()
-            },
-            {
-                id: '2',
-                username: 'OceanHero',
-                image_url: 'https://picsum.photos/seed/ocean/800/600',
-                caption: 'Cleaned 200kg of plastic from the beach today! 🏖️ Our oceans need our help.',
-                hashtags: 'SaveTheOcean, CleanBeach, PlasticFree',
-                location: 'Marina Beach, Chennai',
-                is_verified: true,
-                points: 30,
-                likes: 67,
-                comments_count: 23,
-                shares: 15,
-                created_at: new Date(Date.now() - 7200000).toISOString()
-            },
-            {
-                id: '3',
-                username: 'FoodAngel',
-                image_url: 'https://picsum.photos/seed/food/800/600',
-                caption: 'Distributed food to 100 homeless families today 🍲 No one should go to bed hungry.',
-                hashtags: 'EndHunger, FoodForAll, CommunityLove',
-                location: 'Downtown Shelter',
-                is_verified: false,
-                points: 20,
-                likes: 34,
-                comments_count: 18,
-                shares: 22,
-                created_at: new Date(Date.now() - 10800000).toISOString()
-            },
-            {
-                id: '4',
-                username: 'GreenTeacher',
-                image_url: 'https://picsum.photos/seed/school/800/600',
-                caption: 'Teaching kids about recycling and sustainability 🌱 Building a better tomorrow.',
-                hashtags: 'Education, Sustainability, FutureLeaders',
-                location: 'Green School',
-                is_verified: true,
-                points: 15,
-                likes: 28,
-                comments_count: 9,
-                shares: 5,
-                created_at: new Date(Date.now() - 14400000).toISOString()
-            }
-        ];
-        renderPosts(mockPosts);
-    }
-
-    // ============================================================
-    // CREATE POST
-    // ============================================================
-    function createPost() {
-        const caption = document.getElementById('caption').value.trim();
-        const location = document.getElementById('location').value.trim();
-        const hashtags = document.getElementById('hashtags').value.trim();
-        const imageUrl = document.getElementById('imageUrl').value.trim() || 'https://picsum.photos/800/600';
-
-        if (!caption) {
-            alert('Please describe your good deed!');
-            return;
+            `;
         }
 
-        const payload = { caption, location, hashtags, image_url: imageUrl };
-
-        fetch(`${API_BASE}/create/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(() => {
-            bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
-            document.getElementById('caption').value = '';
-            document.getElementById('location').value = '';
-            document.getElementById('hashtags').value = '';
-            document.getElementById('imageUrl').value = 'https://picsum.photos/800/600';
-            loadFeed();
-        })
-        .catch(err => {
-            console.error('Create post error:', err);
-            alert('✅ Post created! (Demo mode)');
-            bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
-            loadFeed();
-        });
-    }
-
-    // ============================================================
-    // LIKE POST
-    // ============================================================
-    function likePost(postId, btn) {
-        fetch(`${API_BASE}/${postId}/like/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            const card = btn.closest('.post-card');
-            const likeCount = card.querySelector('.like-count');
-            if (likeCount) likeCount.textContent = data.likes || parseInt(likeCount.textContent) + 1;
-            btn.classList.toggle('liked');
-            const icon = btn.querySelector('i');
-            if (btn.classList.contains('liked')) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-            }
-        })
-        .catch(() => {
-            // Optimistic update
-            const card = btn.closest('.post-card');
-            const likeCount = card.querySelector('.like-count');
-            if (likeCount) likeCount.textContent = parseInt(likeCount.textContent) + 1;
-            btn.classList.add('liked');
-            const icon = btn.querySelector('i');
-            icon.classList.remove('far');
-            icon.classList.add('fas');
-        });
-    }
-
-    // ============================================================
-    // VERIFY POST (AI demo)
-    // ============================================================
-    function verifyPost(postId) {
-        fetch(`${API_BASE}/${postId}/verify/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.is_verified) {
-                alert(`✅ Verified! Confidence: ${Math.round(data.verification_score * 100)}%`);
-            } else {
-                alert(`⚠️ Needs review. Confidence: ${Math.round(data.verification_score * 100)}%`);
-            }
-            loadFeed();
-        })
-        .catch(() => alert('🔍 Verification in progress...'));
-    }
-
-    // ============================================================
-    // UTILITY: timeAgo
-    // ============================================================
-    function timeAgo(dateString) {
-        const now = new Date();
-        const past = new Date(dateString);
-        const diff = Math.floor((now - past) / 1000);
-        if (diff < 60) return 'Just now';
-        if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-        if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
-        return `${Math.floor(diff / 604800)}w`;
-    }
-
-    // ============================================================
-    // TAB SWITCHING
-    // ============================================================
-    tabContainer.addEventListener('click', function(e) {
-        const tab = e.target.closest('.tab-btn');
-        if (tab) {
-            const type = tab.dataset.type;
-            loadFeed(type);
+        function renderMockPosts() {
+            const mockPosts = [
+                {
+                    id: '1', username: 'EcoWarrior',
+                    image_url: 'https://picsum.photos/seed/tree/800/600',
+                    caption: 'Planted 50 trees in our community park! 🌳 Every tree counts.',
+                    hashtags: 'GreenEarth, PlantATree',
+                    is_verified: true, points: 25, likes: 45, comments_count: 12,
+                    created_at: new Date(Date.now() - 3600000).toISOString()
+                },
+                {
+                    id: '2', username: 'OceanHero',
+                    image_url: 'https://picsum.photos/seed/ocean/800/600',
+                    caption: 'Cleaned 200kg of plastic from the beach today! 🏖️',
+                    hashtags: 'SaveTheOcean, CleanBeach',
+                    is_verified: true, points: 30, likes: 67, comments_count: 23,
+                    created_at: new Date(Date.now() - 7200000).toISOString()
+                },
+                {
+                    id: '3', username: 'FoodAngel',
+                    image_url: 'https://picsum.photos/seed/food/800/600',
+                    caption: 'Distributed food to 100 homeless families 🍲',
+                    hashtags: 'EndHunger, FoodForAll',
+                    is_verified: false, points: 20, likes: 34, comments_count: 18,
+                    created_at: new Date(Date.now() - 10800000).toISOString()
+                }
+            ];
+            renderPosts(mockPosts);
         }
-    });
 
-    // ============================================================
-    // INIT – Load stories and feed on page load
-    // ============================================================
-    document.addEventListener('DOMContentLoaded', () => {
-        loadStories();
-        loadFeed('all');
-    });
-</script>
-</body>
-</html>
+        function createPost() {
+            const caption = document.getElementById('caption').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const hashtags = document.getElementById('hashtags').value.trim();
+            const imageUrl = document.getElementById('imageUrl').value.trim() || 'https://picsum.photos/800/600';
+
+            if (!caption) { alert('Please describe your good deed!'); return; }
+
+            const payload = { caption, location, hashtags, image_url: imageUrl };
+
+            fetch(`${API_BASE}/create/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(() => {
+                bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
+                document.getElementById('caption').value = '';
+                document.getElementById('location').value = '';
+                document.getElementById('hashtags').value = '';
+                document.getElementById('imageUrl').value = 'https://picsum.photos/800/600';
+                loadFeed();
+            })
+            .catch(() => {
+                alert('✅ Post created! (Demo mode)');
+                bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
+                loadFeed();
+            });
+        }
+
+        function likePost(postId, btn) {
+            fetch(`${API_BASE}/${postId}/like/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const card = btn.closest('.post-card');
+                const likeCount = card.querySelector('.like-count');
+                if (likeCount) likeCount.textContent = data.likes || parseInt(likeCount.textContent) + 1;
+                btn.classList.toggle('liked');
+                const icon = btn.querySelector('i');
+                if (btn.classList.contains('liked')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+            })
+            .catch(() => {
+                // optimistic
+                const card = btn.closest('.post-card');
+                const likeCount = card.querySelector('.like-count');
+                if (likeCount) likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                btn.classList.add('liked');
+                btn.querySelector('i').className = 'fas fa-heart';
+            });
+        }
+
+        function verifyPost(postId) {
+            fetch(`${API_BASE}/${postId}/verify/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.is_verified) {
+                    alert(`✅ Verified! Confidence: ${Math.round(data.verification_score * 100)}%`);
+                } else {
+                    alert(`⚠️ Needs review. Confidence: ${Math.round(data.verification_score * 100)}%`);
+                }
+                loadFeed();
+            })
+            .catch(() => alert('🔍 Verification in progress...'));
+        }
+
+        function timeAgo(dateString) {
+            const now = new Date();
+            const past = new Date(dateString);
+            const diff = Math.floor((now - past) / 1000);
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+            if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
+            return `${Math.floor(diff / 604800)}w`;
+        }
+
+        tabContainer.addEventListener('click', function(e) {
+            const tab = e.target.closest('.tab-btn');
+            if (tab) {
+                const type = tab.dataset.type;
+                loadFeed(type);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStories();
+            loadFeed('all');
+        });
+    </script>
+{% endblock %}

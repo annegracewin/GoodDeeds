@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Login – GoodDeeds{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-card {
+        max-width: 420px;
+        margin: 40px auto;
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 40px 32px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+    }
+    .auth-card .logo {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text);
+        text-align: center;
+    }
+    .auth-card .logo i {
+        color: var(--green-primary);
+    }
+    .auth-card .subtitle {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+    }
+    .auth-card .form-control {
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+    }
+    .auth-card .form-control:focus {
+        border-color: var(--green-primary);
+        box-shadow: 0 0 0 3px rgba(46,125,50,0.15);
+    }
+    .auth-card .btn-success {
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        font-weight: 600;
+        background: var(--green-primary);
+        border: none;
+        transition: var(--transition);
+    }
+    .auth-card .btn-success:hover {
+        background: var(--green-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(46,125,50,0.3);
+    }
+    .auth-card .auth-link {
+        text-align: center;
+        margin-top: 20px;
+        color: var(--text-secondary);
+    }
+    .auth-card .auth-link a {
+        color: var(--green-primary);
+        font-weight: 600;
+    }
+    .auth-card .auth-link a:hover { text-decoration: underline; }
+    .messages .alert {
+        border-radius: var(--radius-sm);
+        padding: 10px 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="logo">
+        <i class="fas fa-leaf"></i> GoodDeeds
+    </div>
+    <p class="subtitle">Login to share your good deeds</p>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label fw-bold">Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-success w-100">
+            <i class="fas fa-sign-in-alt me-2"></i> Login
+        </button>
+    </form>
+
+    <div class="auth-link">
+        Don't have an account? <a href="{% url 'register' %}">Sign up</a>
+    </div>
+</div>
+{% endblock %}

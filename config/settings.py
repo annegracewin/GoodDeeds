@@ -7,6 +7,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
+# ===== INSTALLED APPS =====
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -16,10 +17,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'core',
-    'users',
+    'core',          # ← Our API app
+    'users',        # ← Users app
 ]
 
+# ===== MIDDLEWARE =====
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -33,6 +35,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
+# ===== TEMPLATES =====
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -51,22 +54,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# ========== MYSQL DATABASE ==========
+# ===== DATABASE (MySQL) =====
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gooddeeds_db',
-        'USER': 'gooddeeds',  # Your MySQL username
-        'PASSWORD': 'gooddeeds123',  # Your MySQL password
+        'USER': 'gooddeeds',
+        'PASSWORD': 'gooddeeds123',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
 
+# ===== AUTH =====
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -79,6 +82,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# ===== STATIC & MEDIA =====
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_URL = '/media/'
@@ -86,10 +90,20 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# ===== CORS =====
 CORS_ALLOW_ALL_ORIGINS = True
 
+# ===== REST FRAMEWORK =====
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
 }
+
+# ===== AUTH USER MODEL =====
+AUTH_USER_MODEL = 'users.User'
+
+
+
+# Add this at the bottom
+GEMINI_API_KEY = 'your-gemini-api-key-here'  # Or use environment variable

@@ -1,0 +1,43 @@
+================================================================================
+GOODDEEDS – COVERAGE REPORT
+Date: 2026-08-11 12:21:57
+================================================================================
+
+$ C:\Users\anneg\gooddeeds\venv\Scripts\python.exe -m coverage run manage.py test core.tests
+----------------------------------------
+Found 24 test(s).
+Type 'yes' if you would like to try deleting the test database 'test_gooddeeds_db', or 'no' to cancel: ERRORS:
+Creating test database for alias 'default'...
+
+Got an error creating the test database: (1007, "Can't create database 'test_gooddeeds_db'; database exists")
+
+Tests cancelled.
+
+
+----------------------------------------
+
+$ C:\Users\anneg\gooddeeds\venv\Scripts\python.exe -m coverage report --include=core/*
+----------------------------------------
+Name                              Stmts   Miss  Cover
+-----------------------------------------------------
+core\__init__.py                      0      0   100%
+core\admin.py                         8      0   100%
+core\apps.py                          3      0   100%
+core\models.py                      118      8    93%
+core\tests\__init__.py                0      0   100%
+core\tests\test_models.py            48     34    29%
+core\tests\test_verification.py      53     41    23%
+core\tests\test_views.py             79     57    28%
+core\utils.py                        11     10     9%
+-----------------------------------------------------
+TOTAL                               320    150    53%
+
+----------------------------------------
+
+$ C:\Users\anneg\gooddeeds\venv\Scripts\python.exe -m coverage html --include=core/* -d coverage_html
+----------------------------------------
+ERRORS:
+Wrote HTML report to coverage_html\index.html
+
+----------------------------------------
+

@@ -2,22 +2,192 @@
 
 {% block title %}Dashboard – GoodDeeds{% endblock %}
 
+<!-- Override the main container to be full width with no padding -->
+{% block main_class %}container-fluid px-0 py-3{% endblock %}
+
 {% block extra_css %}
 <style>
-    /* Dashboard specific styles */
+    /* ============================================================
+       DASHBOARD LAYOUT – FULL WIDTH
+       ============================================================ */
+    .dashboard-wrapper {
+        display: flex;
+        gap: 0; /* No gap – sidebar touches content */
+        min-height: calc(100vh - var(--header-height) - 80px);
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* ============================================================
+       LEFT SIDEBAR (Desktop)
+       ============================================================ */
+    .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        background: var(--card-bg);
+        border-right: 1px solid var(--border);
+        border-radius: 0; /* Flush edges */
+        padding: 16px 8px;
+        position: sticky;
+        top: calc(var(--header-height) + 16px);
+        height: fit-content;
+        max-height: calc(100vh - var(--header-height) - 80px);
+        overflow-y: auto;
+        display: none;
+    }
+
+    .sidebar .sidebar-brand {
+        padding: 8px 16px 16px;
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 12px;
+    }
+    .sidebar .sidebar-brand i {
+        color: var(--green-primary);
+        margin-right: 8px;
+    }
+
+    .sidebar .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 14px;
+        transition: var(--transition);
+        cursor: pointer;
+        text-decoration: none;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 2px;
+    }
+    .sidebar .nav-item i {
+        width: 22px;
+        text-align: center;
+        font-size: 18px;
+    }
+    .sidebar .nav-item:hover {
+        background: rgba(46, 125, 50, 0.08);
+        color: var(--green-primary);
+    }
+    .sidebar .nav-item.active {
+        background: var(--green-light);
+        color: var(--green-primary);
+        font-weight: 600;
+    }
+    .sidebar .nav-item .badge-dot {
+        margin-left: auto;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ed4956;
+    }
+    .sidebar .nav-divider {
+        border-top: 1px solid var(--border);
+        margin: 8px 12px;
+    }
+
+    @media (min-width: 992px) {
+        .sidebar {
+            display: block;
+        }
+    }
+
+    /* ============================================================
+       MAIN CONTENT – TAKES ALL REMAINING SPACE
+       ============================================================ */
+    .main-content {
+        flex: 1;
+        min-width: 0;
+        max-width: 100%;
+        padding: 0 20px; /* Small breathing space for the content */
+    }
+
+    /* ============================================================
+       SUBTABS (Horizontal)
+       ============================================================ */
+    .subtab-wrapper {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 4px;
+        margin-bottom: 16px;
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .subtab-wrapper::-webkit-scrollbar { display: none; }
+
+    .subtab-btn {
+        flex: 1;
+        min-width: 80px;
+        padding: 10px 16px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--text-secondary);
+        transition: var(--transition);
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .subtab-btn i {
+        margin-right: 6px;
+        font-size: 14px;
+    }
+    .subtab-btn.active {
+        background: var(--green-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+    }
+    .subtab-btn:not(.active):hover {
+        background: rgba(0,0,0,0.04);
+    }
+    body.dark .subtab-btn:not(.active):hover {
+        background: rgba(255,255,255,0.06);
+    }
+
+    /* ============================================================
+       TAB CONTENT PANELS
+       ============================================================ */
+    .tab-panel {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    .tab-panel.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       STORIES
+       ============================================================ */
     .stories-wrapper {
         background: var(--card-bg);
         border: 1px solid var(--border);
         border-radius: var(--radius);
         padding: 12px 16px;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
         overflow-x: auto;
         scrollbar-width: none;
         -ms-overflow-style: none;
         display: flex;
         gap: 14px;
         align-items: center;
-        flex-shrink: 0;
     }
     .stories-wrapper::-webkit-scrollbar { display: none; }
     .story-item {
@@ -71,42 +241,14 @@
         font-weight: 500;
     }
 
-    .tab-bar {
-        display: flex;
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 4px;
-        margin-bottom: 20px;
-    }
-    .tab-btn {
-        flex: 1;
-        padding: 10px 0;
-        text-align: center;
-        border: none;
-        background: transparent;
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: 14px;
-        color: var(--text-secondary);
-        transition: var(--transition);
-        cursor: pointer;
-    }
-    .tab-btn i { margin-right: 6px; font-size: 15px; }
-    .tab-btn.active {
-        background: var(--green-primary);
-        color: white;
-        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
-    }
-    .tab-btn:not(.active):hover { background: rgba(0,0,0,0.04); }
-    body.dark .tab-btn:not(.active):hover { background: rgba(255,255,255,0.06); }
-
-    /* post card etc. – include from previous version */
+    /* ============================================================
+       POST CARDS
+       ============================================================ */
     .post-card {
         background: var(--card-bg);
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        margin-bottom: 20px;
+        margin-bottom: 16px;
         overflow: hidden;
         transition: var(--transition);
     }
@@ -117,7 +259,7 @@
     .post-header {
         display: flex;
         align-items: center;
-        padding: 14px 16px;
+        padding: 12px 16px;
     }
     .post-avatar {
         width: 40px;
@@ -129,7 +271,7 @@
     }
     .post-user {
         font-weight: 600;
-        font-size: 15px;
+        font-size: 14px;
         color: var(--text);
         flex: 1;
     }
@@ -156,7 +298,7 @@
     }
     .post-image {
         width: 100%;
-        max-height: 600px;
+        max-height: 500px;
         object-fit: cover;
         display: block;
         transition: transform 0.4s;
@@ -169,7 +311,6 @@
         right: 14px;
         background: rgba(0,0,0,0.6);
         backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
         padding: 4px 14px;
         border-radius: 30px;
         font-size: 12px;
@@ -182,6 +323,7 @@
     }
     .verification-overlay.verified { background: rgba(46,125,50,0.85); }
     .verification-overlay.pending { background: rgba(255,179,0,0.85); }
+    .verification-overlay.flagged { background: rgba(220,50,50,0.85); }
 
     .points-overlay {
         position: absolute;
@@ -205,19 +347,20 @@
         display: flex;
         align-items: center;
         padding: 8px 16px;
-        gap: 18px;
+        gap: 12px;
+        flex-wrap: wrap;
     }
     .post-actions .action-btn {
         background: none;
         border: none;
-        font-size: 24px;
+        font-size: 22px;
         color: var(--text);
-        padding: 6px;
+        padding: 4px 8px;
         transition: var(--transition);
         cursor: pointer;
         border-radius: 50%;
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -233,6 +376,12 @@
         color: #ed4956;
     }
     .post-actions .action-btn.liked:hover {
+        background: #fde8e8;
+    }
+    .post-actions .action-btn.delete-btn {
+        color: #dc3545;
+    }
+    .post-actions .action-btn.delete-btn:hover {
         background: #fde8e8;
     }
     .post-actions .action-spacer { flex: 1; }
@@ -266,23 +415,6 @@
     }
     .post-caption .caption-text .hashtag:hover { text-decoration: underline; }
 
-    .post-comments {
-        padding: 0 16px 8px;
-        font-size: 13px;
-        color: var(--text-secondary);
-    }
-    .post-comments .comment .cm-username {
-        font-weight: 600;
-        color: var(--text);
-        margin-right: 4px;
-    }
-    .post-comments .view-all {
-        color: var(--text-secondary);
-        cursor: pointer;
-        font-size: 13px;
-    }
-    .post-comments .view-all:hover { color: var(--text); }
-
     .post-timestamp {
         padding: 0 16px 12px;
         font-size: 11px;
@@ -291,58 +423,136 @@
         letter-spacing: 0.5px;
     }
 
+    /* ============================================================
+       UPLOAD POST BUTTON
+       ============================================================ */
+    .upload-btn-wrapper {
+        text-align: center;
+        margin: 12px 0 8px;
+    }
+    .upload-btn-wrapper .btn-upload {
+        padding: 12px 40px;
+        border-radius: 30px;
+        background: var(--green-primary);
+        color: white;
+        border: none;
+        font-weight: 600;
+        transition: var(--transition);
+        font-size: 15px;
+        width: 100%;
+    }
+    .upload-btn-wrapper .btn-upload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(46, 125, 50, 0.35);
+        background: var(--green-dark);
+    }
+    .upload-btn-wrapper .btn-upload i {
+        margin-right: 8px;
+    }
+
+    /* ============================================================
+       MY UPLOADS FILTERS
+       ============================================================ */
+    .my-uploads-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 16px 0 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .my-uploads-header h6 {
+        font-weight: 700;
+        margin: 0;
+        color: var(--text);
+    }
+    .my-uploads-header h6 i {
+        color: var(--green-primary);
+        margin-right: 8px;
+    }
+
+    .upload-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .upload-filters .filter-btn {
+        padding: 6px 16px;
+        border: 1px solid var(--border);
+        border-radius: 30px;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 500;
+        transition: var(--transition);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .upload-filters .filter-btn:hover {
+        border-color: var(--green-primary);
+        color: var(--text);
+    }
+    .upload-filters .filter-btn.active {
+        background: var(--green-primary);
+        color: white;
+        border-color: var(--green-primary);
+    }
+    .upload-filters .filter-btn .badge-count {
+        background: rgba(0,0,0,0.1);
+        padding: 0 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        margin-left: 4px;
+    }
+    .upload-filters .filter-btn.active .badge-count {
+        background: rgba(255,255,255,0.2);
+    }
+    body.dark .upload-filters .filter-btn .badge-count {
+        background: rgba(255,255,255,0.1);
+    }
+
+    /* ============================================================
+       EMPTY & LOADING STATES
+       ============================================================ */
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
+        padding: 40px 20px;
         background: var(--card-bg);
         border: 1px solid var(--border);
         border-radius: var(--radius);
     }
     .empty-state .icon-wrapper {
-        width: 96px;
-        height: 96px;
+        width: 72px;
+        height: 72px;
         border-radius: 50%;
         background: var(--green-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 20px;
+        margin: 0 auto 16px;
     }
     .empty-state .icon-wrapper i {
-        font-size: 44px;
+        font-size: 32px;
         color: var(--green-primary);
     }
-    .empty-state h4 {
+    .empty-state h6 {
         font-weight: 700;
-        font-size: 22px;
         color: var(--text);
     }
     .empty-state p {
         color: var(--text-secondary);
-        max-width: 380px;
-        margin: 8px auto 24px;
-    }
-    .empty-state .btn-primary {
-        background: var(--green-primary);
-        border: none;
-        border-radius: 30px;
-        padding: 12px 40px;
-        font-weight: 600;
-        transition: var(--transition);
-        color: white;
-    }
-    .empty-state .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 24px rgba(46,125,50,0.35);
-        background: var(--green-dark);
+        font-size: 14px;
     }
 
     .loading-state {
         text-align: center;
-        padding: 60px 20px;
+        padding: 40px 20px;
     }
     .loading-state .leaf-spin {
-        font-size: 48px;
+        font-size: 40px;
         color: var(--green-primary);
         animation: spin 1.2s linear infinite;
     }
@@ -354,13 +564,78 @@
     }
 
     .fade-in {
-        animation: fadeUp 0.5s ease both;
+        animation: fadeUp 0.4s ease both;
     }
     @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(16px); }
+        from { opacity: 0; transform: translateY(12px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
+    /* ============================================================
+       CHALLENGES / REWARDS CARDS
+       ============================================================ */
+    .reward-card, .challenge-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        transition: var(--transition);
+        height: 100%;
+    }
+    .reward-card:hover, .challenge-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+    }
+    .reward-card img, .challenge-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+    .reward-card .card-body, .challenge-card .card-body {
+        padding: 16px;
+    }
+    .reward-card .card-body h6, .challenge-card .card-body h6 {
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+    .reward-card .card-body p, .challenge-card .card-body p {
+        color: var(--text-secondary);
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    /* ============================================================
+       PROFILE TAB
+       ============================================================ */
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--green-primary);
+    }
+    .profile-stats {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+        margin: 12px 0;
+    }
+    .profile-stats div {
+        text-align: center;
+    }
+    .profile-stats .number {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text);
+    }
+    .profile-stats .label {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       MODAL
+       ============================================================ */
     .modal-content {
         border-radius: 28px;
         border: none;
@@ -370,23 +645,23 @@
     }
     .modal-header {
         border-bottom: 1px solid var(--border);
-        padding: 24px 28px 16px;
+        padding: 20px 24px 16px;
     }
     .modal-header .btn-close {
         filter: var(--btn-close-filter, none);
     }
     body.dark .modal-header .btn-close { filter: invert(1); }
-    .modal-body { padding: 24px 28px; }
+    .modal-body { padding: 20px 24px; }
     .modal-footer {
         border-top: 1px solid var(--border);
-        padding: 16px 28px 24px;
+        padding: 16px 24px 20px;
     }
     .modal .form-control {
         background: var(--bg);
         border: 1px solid var(--border);
         color: var(--text);
         border-radius: var(--radius-sm);
-        padding: 14px 16px;
+        padding: 12px 16px;
         transition: var(--transition);
     }
     .modal .form-control:focus {
@@ -399,385 +674,1160 @@
         color: var(--text-secondary);
     }
 
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
     @media (max-width: 576px) {
         .story-ring { width: 54px; height: 54px; }
-        .post-actions .action-btn { font-size: 20px; width: 38px; height: 38px; }
-        .post-image { max-height: 400px; }
-        .tab-btn { font-size: 12px; padding: 8px 0; }
-        .tab-btn i { margin-right: 4px; }
-        .empty-state { padding: 40px 16px; }
+        .post-actions .action-btn { font-size: 18px; width: 34px; height: 34px; }
+        .post-image { max-height: 350px; }
+        .subtab-btn { font-size: 12px; padding: 8px 12px; min-width: 60px; }
+        .subtab-btn i { margin-right: 4px; }
+        .upload-filters .filter-btn { font-size: 11px; padding: 4px 12px; }
+        .upload-btn-wrapper .btn-upload { padding: 10px 24px; font-size: 13px; }
+        .profile-avatar { width: 80px; height: 80px; }
+        .profile-stats { gap: 16px; }
+        .profile-stats .number { font-size: 16px; }
+        .sidebar { display: none; }
+    }
+
+    @media (min-width: 992px) {
+        .sidebar { display: block; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-    <!-- Stories Row -->
-    <div class="stories-wrapper" id="storiesContainer">
-        <div class="loading-state" style="padding:8px;text-align:center;color:var(--text-secondary);width:100%;font-size:14px;">
-            <i class="fas fa-spinner fa-spin"></i> Loading stories...
+<div class="dashboard-wrapper">
+    <!-- ============================================================
+         LEFT SIDEBAR (Desktop)
+         ============================================================ -->
+    <aside class="sidebar" id="mainSidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-leaf"></i> GoodDeeds
         </div>
-    </div>
+        <nav class="nav flex-column">
+            <button class="nav-item active" data-tab="home">
+                <i class="fas fa-home"></i> Home
+            </button>
+            <button class="nav-item" data-tab="challenges">
+                <i class="fas fa-tasks"></i> Challenges
+            </button>
+            <button class="nav-item" data-tab="rewards">
+                <i class="fas fa-gift"></i> Rewards
+            </button>
+            <button class="nav-item" data-tab="profile">
+                <i class="fas fa-user"></i> Profile
+            </button>
+            <div class="nav-divider"></div>
+            <button class="nav-item" onclick="location.href='/logout/'">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </nav>
+    </aside>
 
-    <!-- Tab Bar -->
-    <div class="tab-bar" id="tabContainer">
-        <button class="tab-btn active" data-type="all">
-            <i class="fas fa-home"></i> For You
-        </button>
-        <button class="tab-btn" data-type="verified">
-            <i class="fas fa-check-circle"></i> Verified
-        </button>
-        <button class="tab-btn" data-type="trending">
-            <i class="fas fa-fire"></i> Trending
-        </button>
-    </div>
+    <!-- ============================================================
+         MAIN CONTENT
+         ============================================================ -->
+    <main class="main-content">
 
-    <!-- Feed -->
-    <div id="feedContainer">
-        <div class="loading-state">
-            <i class="fas fa-leaf leaf-spin"></i>
-            <p>Loading good deeds...</p>
-        </div>
-    </div>
-
-    <!-- Create Post Modal -->
-    <div class="modal fade" id="createModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-leaf text-success me-2"></i>Share Your Good Deed</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- ============================================================
+             HOME TAB
+             ============================================================ -->
+        <div class="tab-panel active" id="panel-home">
+            <!-- Stories -->
+            <div class="stories-wrapper" id="storiesContainer">
+                <div class="loading-state" style="padding:8px;text-align:center;color:var(--text-secondary);width:100%;font-size:14px;">
+                    <i class="fas fa-spinner fa-spin"></i> Loading stories...
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">What did you do?</label>
-                        <textarea class="form-control" id="caption" rows="3" placeholder="Planted trees, cleaned a beach, donated food..."></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Location</label>
-                        <input class="form-control" id="location" placeholder="Where did this happen?">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Hashtags</label>
-                        <input class="form-control" id="hashtags" placeholder="e.g., CleanBeach PlantATree">
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label">Image URL</label>
-                        <input class="form-control" id="imageUrl" value="https://picsum.photos/800/600">
-                        <small class="text-muted">Paste an image URL or leave the default.</small>
+            </div>
+
+            <!-- Subtabs (Home) -->
+            <div class="subtab-wrapper" id="homeSubtabs">
+                <button class="subtab-btn active" data-subtab="feed">
+                    <i class="fas fa-rss"></i> Feed
+                </button>
+                <button class="subtab-btn" data-subtab="my-uploads">
+                    <i class="fas fa-upload"></i> My Uploads
+                </button>
+            </div>
+
+            <!-- Feed Subtab -->
+            <div class="subtab-panel active" id="subtab-feed">
+                <div id="feedContainer">
+                    <div class="loading-state">
+                        <i class="fas fa-leaf leaf-spin"></i>
+                        <p>Loading good deeds...</p>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-success" onclick="createPost()">
-                        <i class="fas fa-leaf me-1"></i> Share
+            </div>
+
+            <!-- My Uploads Subtab -->
+            <div class="subtab-panel" id="subtab-my-uploads" style="display:none;">
+                <!-- Upload Filters -->
+                <div class="upload-filters" id="uploadFilters">
+                    <button class="filter-btn active" data-filter="all">
+                        All <span class="badge-count" id="countAll">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="verified">
+                        <i class="fas fa-check-circle" style="color:#2e7d32;"></i> Verified <span class="badge-count" id="countVerified">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="pending">
+                        <i class="fas fa-clock" style="color:#ffb300;"></i> Pending <span class="badge-count" id="countPending">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="flagged">
+                        <i class="fas fa-flag" style="color:#dc3545;"></i> Flagged <span class="badge-count" id="countFlagged">0</span>
+                    </button>
+                </div>
+
+                <!-- My Uploads Container -->
+                <div id="myUploadsContainer">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading your posts...</p>
+                    </div>
+                </div>
+
+                <!-- Upload Button -->
+                <div class="upload-btn-wrapper">
+                    <button class="btn-upload" data-bs-toggle="modal" data-bs-target="#createModal">
+                        <i class="fas fa-plus-circle"></i> Share a Good Deed
                     </button>
                 </div>
             </div>
         </div>
+
+        <!-- ============================================================
+             CHALLENGES TAB
+             ============================================================ -->
+        <div class="tab-panel" id="panel-challenges">
+            <div class="subtab-wrapper">
+                <button class="subtab-btn active" data-subtab="challenges-list">
+                    <i class="fas fa-list"></i> All Challenges
+                </button>
+                <button class="subtab-btn" data-subtab="challenges-my">
+                    <i class="fas fa-user-check"></i> My Challenges
+                </button>
+            </div>
+
+            <div class="subtab-panel active" id="subtab-challenges-list">
+                <div id="challengesContainer">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading challenges...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subtab-panel" id="subtab-challenges-my" style="display:none;">
+                <div id="myChallengesContainer">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading your challenges...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             REWARDS TAB
+             ============================================================ -->
+        <div class="tab-panel" id="panel-rewards">
+            <div id="rewardsContainer">
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading rewards...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             PROFILE TAB
+             ============================================================ -->
+        <div class="tab-panel" id="panel-profile">
+            <div id="profileContainer">
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading profile...</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ============================================================
+     CREATE POST MODAL
+     ============================================================ -->
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-leaf text-success me-2"></i>Share Your Good Deed</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">What did you do?</label>
+                    <textarea class="form-control" id="caption" rows="3" placeholder="Planted trees, cleaned a beach, donated food..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Location</label>
+                    <input class="form-control" id="location" placeholder="Where did this happen?">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Hashtags</label>
+                    <input class="form-control" id="hashtags" placeholder="e.g., CleanBeach PlantATree">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Upload Image</label>
+                    <input class="form-control" type="file" id="imageFile" accept="image/*">
+                    <small class="text-muted">Or paste a URL below.</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image URL (optional if file uploaded)</label>
+                    <input class="form-control" id="imageUrl" placeholder="https://picsum.photos/800/600">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success" onclick="createPost()">
+                    <i class="fas fa-leaf me-1"></i> Share
+                </button>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        // Dashboard-specific JavaScript
-        const API_BASE = '/api';
-        const feedContainer = document.getElementById('feedContainer');
-        const storiesContainer = document.getElementById('storiesContainer');
-        const tabContainer = document.getElementById('tabContainer');
+<script>
+    // ============================================================
+    // GLOBALS
+    // ============================================================
+    const API_BASE = '/api';
+    const currentUserId = "{{ user.id|default:'null' }}";
+    const isStaff = "{{ user.is_staff|yesno:'true,false' }}";
+    const currentUser = "{{ user.username|default:'Guest' }}";
 
-        // Load stories
-        function loadStories() {
-            fetch(`${API_BASE}/users/`)
-                .then(res => { if (!res.ok) throw new Error('API error'); return res.json(); })
-                .then(users => {
-                    if (users.length === 0) {
-                        storiesContainer.innerHTML = `
-                            <div class="story-item" onclick="alert('Your profile')">
-                                <div class="story-ring"><img src="https://ui-avatars.com/api/?name=You&background=2e7d32&color=fff&size=64" alt="You"></div>
-                                <span class="story-name">You</span>
-                            </div>
-                            <div class="story-item" onclick="alert('Add Story coming soon!')">
-                                <div class="story-ring add-story"><div class="add-icon"><i class="fas fa-plus"></i></div></div>
-                                <span class="story-name">Add</span>
-                            </div>
-                        `;
-                        return;
-                    }
-                    const storiesHtml = users.slice(0, 10).map(user => `
-                        <div class="story-item" onclick="alert('View ${user.username}\'s profile')">
-                            <div class="story-ring">
-                                <img src="${user.profile_pic || 'https://ui-avatars.com/api/?name=' + user.username + '&background=2e7d32&color=fff&size=64'}" alt="${user.username}">
-                            </div>
-                            <span class="story-name">${user.username}</span>
-                        </div>
-                    `).join('');
-                    storiesContainer.innerHTML = `
-                        ${storiesHtml}
-                        <div class="story-item" onclick="alert('Add Story coming soon!')">
-                            <div class="story-ring add-story"><div class="add-icon"><i class="fas fa-plus"></i></div></div>
-                            <span class="story-name">Add</span>
-                        </div>
-                    `;
-                })
-                .catch(() => {
-                    // fallback
-                    storiesContainer.innerHTML = `
-                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=You&background=2e7d32&color=fff&size=64"></div><span class="story-name">You</span></div>
-                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Alice&background=2196F3&color=fff&size=64"></div><span class="story-name">Alice</span></div>
-                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Bob&background=FF9800&color=fff&size=64"></div><span class="story-name">Bob</span></div>
-                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Carol&background=4CAF50&color=fff&size=64"></div><span class="story-name">Carol</span></div>
-                        <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Dave&background=F44336&color=fff&size=64"></div><span class="story-name">Dave</span></div>
-                        <div class="story-item"><div class="story-ring add-story"><div class="add-icon"><i class="fas fa-plus"></i></div></div><span class="story-name">Add</span></div>
-                    `;
-                });
+    let currentFeedType = 'all';
+    let currentPosts = [];
+    let pendingPostIds = new Set();
+    let currentUploadFilter = 'all';
+
+    // ============================================================
+    // CSRF TOKEN HELPER
+    // ============================================================
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith('csrftoken=')) {
+                    cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
+                    break;
+                }
+            }
         }
+        return cookieValue;
+    }
 
-        // Load feed
-        function loadFeed(type = 'all') {
-            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-            const activeTab = document.querySelector(`.tab-btn[data-type="${type}"]`);
-            if (activeTab) activeTab.classList.add('active');
+    // ============================================================
+    // TIME AGO HELPER
+    // ============================================================
+    function timeAgo(dateString) {
+        const now = new Date();
+        const past = new Date(dateString);
+        const diff = Math.floor((now - past) / 1000);
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
+        return `${Math.floor(diff / 604800)}w`;
+    }
 
-            feedContainer.innerHTML = `
-                <div class="loading-state">
-                    <i class="fas fa-leaf leaf-spin"></i>
-                    <p>Loading good deeds...</p>
-                </div>
-            `;
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(message, type = 'success') {
+        alert(message);
+    }
 
-            fetch(`${API_BASE}/feed/?type=${type}`)
-                .then(res => { if (!res.ok) throw new Error('API error'); return res.json(); })
-                .then(data => {
-                    if (data.length === 0) renderEmptyState();
-                    else renderPosts(data);
-                })
-                .catch(() => renderMockPosts());
+    // ============================================================
+    // SIDEBAR NAVIGATION
+    // ============================================================
+    document.querySelectorAll('.sidebar .nav-item[data-tab]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            switchTab(tab);
+        });
+    });
+
+    function switchTab(tab) {
+        // Update sidebar
+        document.querySelectorAll('.sidebar .nav-item[data-tab]').forEach(b => b.classList.remove('active'));
+        const sidebarBtn = document.querySelector(`.sidebar .nav-item[data-tab="${tab}"]`);
+        if (sidebarBtn) sidebarBtn.classList.add('active');
+
+        // Update panels
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        const panel = document.getElementById(`panel-${tab}`);
+        if (panel) panel.classList.add('active');
+
+        // Load data based on tab
+        if (tab === 'home') {
+            loadFeed('all');
+            loadStories();
+        } else if (tab === 'challenges') {
+            loadChallenges();
+        } else if (tab === 'rewards') {
+            loadRewards();
+        } else if (tab === 'profile') {
+            loadProfile();
         }
+    }
 
-        function renderPosts(posts) {
-            if (!posts || posts.length === 0) { renderEmptyState(); return; }
+    // ============================================================
+    // SUBTAB SWITCHING
+    // ============================================================
+    document.querySelectorAll('.subtab-wrapper').forEach(wrapper => {
+        wrapper.querySelectorAll('.subtab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parent = this.closest('.subtab-wrapper');
+                const subtab = this.dataset.subtab;
+                const panelId = `subtab-${subtab}`;
 
-            feedContainer.innerHTML = posts.map(post => {
-                const isVerified = post.is_verified;
-                const badgeClass = isVerified ? 'verified' : 'pending';
-                const badgeIcon = isVerified ? 'fa-check-circle' : 'fa-clock';
-                const badgeText = isVerified ? 'Verified' : 'Pending';
+                // Update buttons
+                parent.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
 
-                return `
-                    <div class="post-card fade-in">
-                        <div class="post-header">
-                            <img src="https://ui-avatars.com/api/?name=${post.username || 'User'}&background=2e7d32&color=fff&size=40"
-                                 class="post-avatar" alt="${post.username}">
-                            <span class="post-user">${post.username || 'Anonymous'}</span>
-                            <span class="post-time">• ${timeAgo(post.created_at)}</span>
-                            <button class="post-more"><i class="fas fa-ellipsis-h"></i></button>
+                // Update panels
+                const tabPanel = parent.closest('.tab-panel');
+                tabPanel.querySelectorAll('.subtab-panel').forEach(p => p.style.display = 'none');
+                const panel = tabPanel.querySelector(`#${panelId}`);
+                if (panel) panel.style.display = 'block';
+
+                // Load data if needed
+                if (subtab === 'my-uploads') {
+                    loadMyUploads();
+                }
+                if (subtab === 'challenges-my') {
+                    loadMyChallenges();
+                }
+                if (subtab === 'challenges-list') {
+                    loadChallenges();
+                }
+            });
+        });
+    });
+
+    // ============================================================
+    // STORIES
+    // ============================================================
+    function loadStories() {
+        const container = document.getElementById('storiesContainer');
+        fetch(`${API_BASE}/users/`)
+            .then(res => { if (!res.ok) throw new Error('API error'); return res.json(); })
+            .then(users => {
+                if (users.length === 0) {
+                    container.innerHTML = getStoryFallbackHTML();
+                    return;
+                }
+                const storiesHtml = users.slice(0, 10).map(user => `
+                    <div class="story-item" onclick="alert('View ${user.username}\'s profile')">
+                        <div class="story-ring">
+                            <img src="${user.profile_pic || 'https://ui-avatars.com/api/?name=' + user.username + '&background=2e7d32&color=fff&size=64'}" alt="${user.username}">
                         </div>
-
-                        <div class="post-image-wrapper">
-                            <img src="${post.image_url || 'https://picsum.photos/800/600'}" class="post-image" alt="Post"
-                                 onerror="this.src='https://picsum.photos/800/600'">
-                            <div class="verification-overlay ${badgeClass}">
-                                <i class="fas ${badgeIcon}"></i> ${badgeText}
-                            </div>
-                            ${post.points > 0 ? `
-                                <div class="points-overlay">
-                                    <i class="fas fa-leaf"></i> +${post.points} pts
-                                </div>
-                            ` : ''}
-                        </div>
-
-                        <div class="post-actions">
-                            <button class="action-btn" onclick="likePost('${post.id}', this)">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="action-btn" onclick="alert('Comments coming soon!')">
-                                <i class="far fa-comment"></i>
-                            </button>
-                            <button class="action-btn" onclick="alert('Share coming soon!')">
-                                <i class="far fa-paper-plane"></i>
-                            </button>
-                            <span class="action-spacer"></span>
-                            <button class="action-btn" onclick="verifyPost('${post.id}')" title="Verify with AI">
-                                <i class="fas fa-shield-alt"></i>
-                            </button>
-                            <button class="action-btn" onclick="alert('Saved!')">
-                                <i class="far fa-bookmark"></i>
-                            </button>
-                        </div>
-
-                        <div class="post-meta">
-                            <span class="like-count">${post.likes || 0}</span> likes
-                        </div>
-
-                        <div class="post-caption">
-                            <span class="username">${post.username || 'Anonymous'}</span>
-                            <span class="caption-text">
-                                ${post.caption || ''}
-                                ${post.hashtags ? post.hashtags.split(',').map(t =>
-                                    ` <a href="#" class="hashtag">#${t.trim()}</a>`
-                                ).join('') : ''}
-                            </span>
-                        </div>
-
-                        ${post.comments_count > 0 ? `
-                            <div class="post-comments">
-                                <div class="comment">
-                                    <span class="cm-username">${post.username || 'User'}</span>
-                                    <span>${post.caption ? post.caption.split(' ').slice(0, 8).join(' ') + '...' : ''}</span>
-                                </div>
-                                <span class="view-all">View all ${post.comments_count} comments</span>
-                            </div>
-                        ` : ''}
-
-                        <div class="post-timestamp">${new Date(post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</div>
+                        <span class="story-name">${user.username}</span>
+                    </div>
+                `).join('');
+                container.innerHTML = `
+                    ${storiesHtml}
+                    <div class="story-item" onclick="alert('Add Story coming soon!')">
+                        <div class="story-ring add-story"><div class="add-icon"><i class="fas fa-plus"></i></div></div>
+                        <span class="story-name">Add</span>
                     </div>
                 `;
-            }).join('');
+            })
+            .catch(() => {
+                container.innerHTML = getStoryFallbackHTML();
+            });
+    }
+
+    function getStoryFallbackHTML() {
+        return `
+            <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=You&background=2e7d32&color=fff&size=64"></div><span class="story-name">You</span></div>
+            <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Alice&background=2196F3&color=fff&size=64"></div><span class="story-name">Alice</span></div>
+            <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Bob&background=FF9800&color=fff&size=64"></div><span class="story-name">Bob</span></div>
+            <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Carol&background=4CAF50&color=fff&size=64"></div><span class="story-name">Carol</span></div>
+            <div class="story-item"><div class="story-ring"><img src="https://ui-avatars.com/api/?name=Dave&background=F44336&color=fff&size=64"></div><span class="story-name">Dave</span></div>
+            <div class="story-item"><div class="story-ring add-story"><div class="add-icon"><i class="fas fa-plus"></i></div></div><span class="story-name">Add</span></div>
+        `;
+    }
+
+    // ============================================================
+    // FEED
+    // ============================================================
+    function loadFeed(type = 'all') {
+        const container = document.getElementById('feedContainer');
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-leaf leaf-spin"></i>
+                <p>Loading good deeds...</p>
+            </div>
+        `;
+
+        fetch(`${API_BASE}/feed/?type=${type}`)
+            .then(res => { if (!res.ok) throw new Error('API error'); return res.json(); })
+            .then(data => {
+                currentPosts = data;
+                if (data.length === 0) renderEmptyState();
+                else renderPosts(data);
+            })
+            .catch(err => {
+                console.error('Feed load error:', err);
+                renderMockPosts();
+            });
+    }
+
+    function renderPosts(posts) {
+        const container = document.getElementById('feedContainer');
+        if (!posts || posts.length === 0) {
+            renderEmptyState();
+            return;
         }
 
-        function renderEmptyState() {
-            feedContainer.innerHTML = `
-                <div class="empty-state fade-in">
-                    <div class="icon-wrapper"><i class="fas fa-leaf"></i></div>
-                    <h4>No good deeds yet</h4>
-                    <p>Be the first to share a positive impact and inspire others.</p>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
-                        <i class="fas fa-plus me-1"></i> Create First Post
-                    </button>
+        container.innerHTML = posts.map(post => {
+            const isVerified = post.is_verified;
+            const badgeClass = isVerified ? 'verified' : (post.verification_status === 'flagged' ? 'flagged' : 'pending');
+            const badgeIcon = isVerified ? 'fa-check-circle' : (post.verification_status === 'flagged' ? 'fa-flag' : 'fa-clock');
+            const badgeText = isVerified ? 'Verified' : (post.verification_status === 'flagged' ? 'Flagged' : 'Pending');
+            
+            const isLiked = post.is_liked || false;
+            const heartClass = isLiked ? 'fas' : 'far';
+            const likedClass = isLiked ? 'liked' : '';
+            
+            const isOwner = (post.user_id == currentUserId);
+            const showDelete = isOwner || (isStaff === 'true');
+            
+            const imageSrc = post.image || post.image_url || 'https://picsum.photos/800/600';
+
+            return `
+                <div class="post-card fade-in" data-post-id="${post.id}">
+                    <div class="post-header">
+                        <img src="https://ui-avatars.com/api/?name=${post.username || 'User'}&background=2e7d32&color=fff&size=40"
+                             class="post-avatar" alt="${post.username}">
+                        <span class="post-user">${post.username || 'Anonymous'}</span>
+                        <span class="post-time">• ${timeAgo(post.created_at)}</span>
+                        <button class="post-more"><i class="fas fa-ellipsis-h"></i></button>
+                    </div>
+
+                    <div class="post-image-wrapper">
+                        <img src="${imageSrc}" class="post-image" alt="Post"
+                             onerror="this.src='https://picsum.photos/800/600'">
+                        <div class="verification-overlay ${badgeClass}">
+                            <i class="fas ${badgeIcon}"></i> ${badgeText}
+                        </div>
+                        ${post.points > 5 ? `
+                            <div class="points-overlay">
+                                <i class="fas fa-leaf"></i> +${post.points} pts
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="post-actions">
+                        <button class="action-btn ${likedClass}" onclick="likePost('${post.id}', this)">
+                            <i class="${heartClass} fa-heart"></i>
+                        </button>
+                        <button class="action-btn" onclick="alert('Comments coming soon!')">
+                            <i class="far fa-comment"></i>
+                        </button>
+                        <button class="action-btn" onclick="alert('Share coming soon!')">
+                            <i class="far fa-paper-plane"></i>
+                        </button>
+                        <span class="action-spacer"></span>
+                        <button class="action-btn" onclick="verifyPost('${post.id}')" title="Verify with AI">
+                            <i class="fas fa-shield-alt"></i>
+                        </button>
+                        ${showDelete ? `
+                            <button class="action-btn delete-btn" onclick="deletePost('${post.id}')" title="Delete post">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <div class="post-meta">
+                        <span class="like-count">${post.likes || 0}</span> likes
+                    </div>
+
+                    <div class="post-caption">
+                        <span class="username">${post.username || 'Anonymous'}</span>
+                        <span class="caption-text">
+                            ${post.caption || ''}
+                            ${post.hashtags ? post.hashtags.split(',').map(t =>
+                                ` <a href="#" class="hashtag">#${t.trim()}</a>`
+                            ).join('') : ''}
+                        </span>
+                    </div>
+
+                    <div class="post-timestamp">${new Date(post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</div>
                 </div>
             `;
-        }
+        }).join('');
+    }
 
-        function renderMockPosts() {
-            const mockPosts = [
-                {
-                    id: '1', username: 'EcoWarrior',
-                    image_url: 'https://picsum.photos/seed/tree/800/600',
-                    caption: 'Planted 50 trees in our community park! 🌳 Every tree counts.',
-                    hashtags: 'GreenEarth, PlantATree',
-                    is_verified: true, points: 25, likes: 45, comments_count: 12,
-                    created_at: new Date(Date.now() - 3600000).toISOString()
-                },
-                {
-                    id: '2', username: 'OceanHero',
-                    image_url: 'https://picsum.photos/seed/ocean/800/600',
-                    caption: 'Cleaned 200kg of plastic from the beach today! 🏖️',
-                    hashtags: 'SaveTheOcean, CleanBeach',
-                    is_verified: true, points: 30, likes: 67, comments_count: 23,
-                    created_at: new Date(Date.now() - 7200000).toISOString()
-                },
-                {
-                    id: '3', username: 'FoodAngel',
-                    image_url: 'https://picsum.photos/seed/food/800/600',
-                    caption: 'Distributed food to 100 homeless families 🍲',
-                    hashtags: 'EndHunger, FoodForAll',
-                    is_verified: false, points: 20, likes: 34, comments_count: 18,
-                    created_at: new Date(Date.now() - 10800000).toISOString()
-                }
-            ];
-            renderPosts(mockPosts);
-        }
+    function renderEmptyState() {
+        const container = document.getElementById('feedContainer');
+        container.innerHTML = `
+            <div class="empty-state fade-in">
+                <div class="icon-wrapper"><i class="fas fa-leaf"></i></div>
+                <h6>No good deeds yet</h6>
+                <p>Be the first to share a positive impact and inspire others.</p>
+            </div>
+        `;
+    }
 
-        function createPost() {
-            const caption = document.getElementById('caption').value.trim();
-            const location = document.getElementById('location').value.trim();
-            const hashtags = document.getElementById('hashtags').value.trim();
-            const imageUrl = document.getElementById('imageUrl').value.trim() || 'https://picsum.photos/800/600';
+    function renderMockPosts() {
+        const mockPosts = [
+            {
+                id: '1', username: 'EcoWarrior', user_id: '1',
+                image_url: 'https://picsum.photos/seed/tree/800/600',
+                caption: 'Planted 50 trees in our community park! 🌳 Every tree counts.',
+                hashtags: 'GreenEarth, PlantATree',
+                is_verified: true, points: 25, likes: 45, comments_count: 12,
+                created_at: new Date(Date.now() - 3600000).toISOString(),
+                is_liked: false
+            },
+            {
+                id: '2', username: 'OceanHero', user_id: '2',
+                image_url: 'https://picsum.photos/seed/ocean/800/600',
+                caption: 'Cleaned 200kg of plastic from the beach today! 🏖️',
+                hashtags: 'SaveTheOcean, CleanBeach',
+                is_verified: true, points: 30, likes: 67, comments_count: 23,
+                created_at: new Date(Date.now() - 7200000).toISOString(),
+                is_liked: false
+            }
+        ];
+        currentPosts = mockPosts;
+        renderPosts(mockPosts);
+    }
 
-            if (!caption) { alert('Please describe your good deed!'); return; }
-
-            const payload = { caption, location, hashtags, image_url: imageUrl };
-
-            fetch(`${API_BASE}/create/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
+    // ============================================================
+    // MY UPLOADS
+    // ============================================================
+    function loadMyUploads() {
+        fetch(`${API_BASE}/feed/`)
             .then(res => res.json())
-            .then(() => {
-                bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
-                document.getElementById('caption').value = '';
-                document.getElementById('location').value = '';
-                document.getElementById('hashtags').value = '';
-                document.getElementById('imageUrl').value = 'https://picsum.photos/800/600';
-                loadFeed();
+            .then(posts => {
+                const myPosts = posts.filter(p => p.user_id == currentUserId);
+                renderMyUploads(myPosts, currentUploadFilter);
             })
             .catch(() => {
-                alert('✅ Post created! (Demo mode)');
-                bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
-                loadFeed();
+                const container = document.getElementById('myUploadsContainer');
+                container.innerHTML = `<p class="text-muted text-center">Could not load your posts.</p>`;
             });
+    }
+
+    function renderMyUploads(posts, filter) {
+        const container = document.getElementById('myUploadsContainer');
+        let filteredPosts = posts;
+        if (filter === 'verified') {
+            filteredPosts = posts.filter(p => p.is_verified === true);
+        } else if (filter === 'pending') {
+            filteredPosts = posts.filter(p => p.verification_status === 'pending');
+        } else if (filter === 'flagged') {
+            filteredPosts = posts.filter(p => p.verification_status === 'flagged');
         }
 
-        function likePost(postId, btn) {
-            fetch(`${API_BASE}/${postId}/like/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
+        // Update counts
+        document.getElementById('countAll').textContent = posts.length;
+        document.getElementById('countVerified').textContent = posts.filter(p => p.is_verified === true).length;
+        document.getElementById('countPending').textContent = posts.filter(p => p.verification_status === 'pending').length;
+        document.getElementById('countFlagged').textContent = posts.filter(p => p.verification_status === 'flagged').length;
+
+        if (filteredPosts.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="padding:20px;">
+                    <div class="icon-wrapper" style="width:48px;height:48px;"><i class="fas fa-upload" style="font-size:20px;"></i></div>
+                    <p class="text-muted small mb-0">No ${filter !== 'all' ? filter : ''} uploads found.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filteredPosts.map(post => {
+            const isVerified = post.is_verified;
+            const badgeClass = isVerified ? 'verified' : (post.verification_status === 'flagged' ? 'flagged' : 'pending');
+            const badgeIcon = isVerified ? 'fa-check-circle' : (post.verification_status === 'flagged' ? 'fa-flag' : 'fa-clock');
+            const badgeText = isVerified ? 'Verified' : (post.verification_status === 'flagged' ? 'Flagged' : 'Pending');
+            const imageSrc = post.image || post.image_url || 'https://picsum.photos/800/600';
+            
+            const isOwner = (post.user_id == currentUserId);
+            const showDelete = isOwner || (isStaff === 'true');
+
+            return `
+                <div class="post-card fade-in mb-3" data-post-id="${post.id}">
+                    <div class="post-header">
+                        <img src="https://ui-avatars.com/api/?name=${post.username || 'User'}&background=2e7d32&color=fff&size=40" class="post-avatar">
+                        <span class="post-user">${post.username || 'Anonymous'}</span>
+                        <span class="post-time">${timeAgo(post.created_at)}</span>
+                    </div>
+                    <div class="post-image-wrapper" style="max-height:200px;">
+                        <img src="${imageSrc}" class="post-image" style="max-height:200px;" onerror="this.src='https://picsum.photos/800/600'">
+                        <div class="verification-overlay ${badgeClass}">
+                            <i class="fas ${badgeIcon}"></i> ${badgeText}
+                        </div>
+                        ${post.points > 5 ? `
+                            <div class="points-overlay">
+                                <i class="fas fa-leaf"></i> ${post.points} pts
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="post-caption">
+                        <span class="caption-text">${post.caption || ''}</span>
+                    </div>
+                    <div class="post-meta d-flex justify-content-between align-items-center">
+                        <span>❤️ ${post.likes} likes</span>
+                        <div>
+                            ${showDelete ? `
+                                <button class="btn btn-sm btn-outline-danger" onclick="deletePost('${post.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ============================================================
+    // CHALLENGES
+    // ============================================================
+    function loadChallenges() {
+        const container = document.getElementById('challengesContainer');
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading challenges...</p>
+            </div>
+        `;
+
+        fetch(`${API_BASE}/challenges/`)
             .then(res => res.json())
             .then(data => {
-                const card = btn.closest('.post-card');
-                const likeCount = card.querySelector('.like-count');
-                if (likeCount) likeCount.textContent = data.likes || parseInt(likeCount.textContent) + 1;
-                btn.classList.toggle('liked');
-                const icon = btn.querySelector('i');
-                if (btn.classList.contains('liked')) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                } else {
-                    icon.classList.remove('fas');
-                    icon.classList.add('far');
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon-wrapper"><i class="fas fa-tasks"></i></div>
+                            <h6>No active challenges</h6>
+                            <p>Check back later for new challenges!</p>
+                        </div>
+                    `;
+                    return;
                 }
+                container.innerHTML = `
+                    <div class="row g-3">
+                        ${data.map(ch => `
+                            <div class="col-md-6 col-lg-4">
+                                <div class="challenge-card">
+                                    <img src="${ch.image || 'https://picsum.photos/400/200'}" alt="${ch.title}">
+                                    <div class="card-body">
+                                        <h6>${ch.title}</h6>
+                                        <p>${ch.description}</p>
+                                        <div>
+                                            <span class="badge bg-success">${ch.category}</span>
+                                            <span class="badge bg-primary">${ch.points_reward} pts</span>
+                                        </div>
+                                        <p class="mt-2 small"><i class="fas fa-users"></i> ${ch.participants_count} participants</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <button class="btn btn-success w-100 btn-sm" onclick="joinChallenge(${ch.id})">
+                                            <i class="fas fa-hand-peace me-1"></i> Join
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             })
             .catch(() => {
-                // optimistic
-                const card = btn.closest('.post-card');
-                const likeCount = card.querySelector('.like-count');
-                if (likeCount) likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                container.innerHTML = `<p class="text-muted">Error loading challenges.</p>`;
+            });
+    }
+
+    function loadMyChallenges() {
+        const container = document.getElementById('myChallengesContainer');
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading your challenges...</p>
+            </div>
+        `;
+
+        fetch(`${API_BASE}/challenges/my/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon-wrapper"><i class="fas fa-tasks"></i></div>
+                            <h6>No challenges joined</h6>
+                            <p>Join a challenge to start earning points!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = `
+                    <div class="list-group">
+                        ${data.map(p => `
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${p.challenge_title}</strong>
+                                    <span class="badge bg-${p.status === 'completed' ? 'success' : 'warning'} ms-2">${p.status}</span>
+                                    <div class="small text-muted">Posts: ${p.posts_count} | Points: ${p.points_earned}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            })
+            .catch(() => {
+                container.innerHTML = `<p class="text-muted">Error loading your challenges.</p>`;
+            });
+    }
+
+    function joinChallenge(id) {
+        fetch(`${API_BASE}/challenges/${id}/join/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRFToken() },
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message || 'Joined successfully!');
+            loadChallenges();
+        })
+        .catch(() => alert('Please login to join!'));
+    }
+
+    // ============================================================
+    // REWARDS
+    // ============================================================
+    function loadRewards() {
+        const container = document.getElementById('rewardsContainer');
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading rewards...</p>
+            </div>
+        `;
+
+        fetch(`${API_BASE}/rewards/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon-wrapper"><i class="fas fa-gift"></i></div>
+                            <h6>No rewards available</h6>
+                            <p>Check back later for new rewards!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = `
+                    <div class="row g-3">
+                        ${data.map(r => `
+                            <div class="col-md-6 col-lg-4">
+                                <div class="reward-card">
+                                    <img src="${r.image || 'https://picsum.photos/400/200'}" alt="${r.name}">
+                                    <div class="card-body">
+                                        <h6>${r.name}</h6>
+                                        <p>${r.description}</p>
+                                        <p><span class="badge bg-warning text-dark">${r.points_cost} pts</span></p>
+                                        <p class="small text-muted">${r.stock_quantity} left in stock</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <button class="btn btn-primary w-100 btn-sm" onclick="redeemReward(${r.id})">
+                                            <i class="fas fa-exchange-alt me-1"></i> Redeem
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            })
+            .catch(() => {
+                container.innerHTML = `<p class="text-muted">Error loading rewards.</p>`;
+            });
+    }
+
+    function redeemReward(id) {
+        if (!confirm('Redeem this reward?')) return;
+        fetch(`${API_BASE}/rewards/${id}/redeem/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRFToken() },
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert('Redemption successful! Please wait for approval.');
+            loadRewards();
+        })
+        .catch(err => alert('Error: ' + err.message));
+    }
+
+    // ============================================================
+    // PROFILE
+    // ============================================================
+    function loadProfile() {
+        const container = document.getElementById('profileContainer');
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading profile...</p>
+            </div>
+        `;
+
+        fetch(`${API_BASE}/auth/user/`)
+            .then(res => res.json())
+            .then(user => {
+                container.innerHTML = `
+                    <div class="text-center mb-4">
+                        <img src="https://ui-avatars.com/api/?name=${user.username}&background=2e7d32&color=fff&size=120" 
+                             class="profile-avatar">
+                        <h4 class="mt-3">${user.username}</h4>
+                        <p class="text-muted">${user.bio || 'No bio set'}</p>
+                        <div class="profile-stats">
+                            <div>
+                                <div class="number">${user.nature_points || 0}</div>
+                                <div class="label">Points</div>
+                            </div>
+                            <div>
+                                <div class="number">${user.total_posts || 0}</div>
+                                <div class="label">Posts</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="fw-bold">My Posts</h6>
+                    <div id="profilePosts">
+                        <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+                    </div>
+                `;
+                // Load user's posts
+                fetch(`${API_BASE}/feed/`)
+                    .then(res => res.json())
+                    .then(posts => {
+                        const userPosts = posts.filter(p => p.user_id == currentUserId);
+                        const postsContainer = document.getElementById('profilePosts');
+                        if (userPosts.length === 0) {
+                            postsContainer.innerHTML = `<p class="text-muted">No posts yet.</p>`;
+                            return;
+                        }
+                        postsContainer.innerHTML = userPosts.map(p => `
+                            <div class="post-card fade-in mb-3">
+                                <div class="post-header">
+                                    <img src="https://ui-avatars.com/api/?name=${p.username}&background=2e7d32&color=fff&size=40" class="post-avatar">
+                                    <span class="post-user">${p.username}</span>
+                                    <span class="post-time">${timeAgo(p.created_at)}</span>
+                                </div>
+                                <div class="post-image-wrapper">
+                                    <img src="${p.image || p.image_url || 'https://picsum.photos/800/600'}" class="post-image" style="max-height:250px;">
+                                </div>
+                                <div class="post-caption">
+                                    <span class="caption-text">${p.caption}</span>
+                                </div>
+                                <div class="post-meta">
+                                    <span>❤️ ${p.likes} likes</span>
+                                    <span class="ms-3">${p.is_verified ? '✅ Verified' : (p.verification_status === 'flagged' ? '🚩 Flagged' : '⏳ Pending')}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    });
+            })
+            .catch(() => {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon-wrapper"><i class="fas fa-user"></i></div>
+                        <h6>Please login to view profile</h6>
+                    </div>
+                `;
+            });
+    }
+
+    // ============================================================
+    // CREATE POST
+    // ============================================================
+    function createPost() {
+        const caption = document.getElementById('caption').value.trim();
+        const location = document.getElementById('location').value.trim();
+        const hashtags = document.getElementById('hashtags').value.trim();
+        const imageFile = document.getElementById('imageFile').files[0];
+        const imageUrl = document.getElementById('imageUrl').value.trim();
+
+        if (!caption) {
+            alert('Please describe your good deed!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('caption', caption);
+        formData.append('location', location);
+        formData.append('hashtags', hashtags);
+        if (imageFile) {
+            formData.append('image', imageFile);
+        } else if (imageUrl) {
+            formData.append('image_url', imageUrl);
+        } else {
+            formData.append('image_url', 'https://picsum.photos/800/600');
+        }
+
+        fetch(`${API_BASE}/create/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRFToken() },
+            body: formData,
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
+            document.getElementById('caption').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('hashtags').value = '';
+            document.getElementById('imageFile').value = '';
+            document.getElementById('imageUrl').value = '';
+            loadFeed('all');
+            loadMyUploads();
+            if (data.verification_status === 'pending') {
+                startPolling(data.id);
+            }
+            showToast('Post created successfully!');
+        })
+        .catch(err => {
+            console.error('Create post error:', err);
+            alert('Error creating post: ' + err.message);
+        });
+    }
+
+    // ============================================================
+    // LIKE POST
+    // ============================================================
+    function likePost(postId, btn) {
+        fetch(`${API_BASE}/${postId}/like/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+        })
+        .then(res => res.json())
+        .then(data => {
+            const card = btn.closest('.post-card');
+            const likeCount = card.querySelector('.like-count');
+            if (likeCount) {
+                likeCount.textContent = data.likes;
+            }
+            const icon = btn.querySelector('i');
+            if (data.liked) {
                 btn.classList.add('liked');
-                btn.querySelector('i').className = 'fas fa-heart';
-            });
-        }
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+            } else {
+                btn.classList.remove('liked');
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+            }
+        })
+        .catch(err => {
+            console.error('Like request failed:', err);
+            const card = btn.closest('.post-card');
+            const likeCount = card.querySelector('.like-count');
+            if (likeCount) {
+                likeCount.textContent = parseInt(likeCount.textContent) + 1;
+            }
+            btn.classList.add('liked');
+            btn.querySelector('i').className = 'fas fa-heart';
+        });
+    }
 
-        function verifyPost(postId) {
-            fetch(`${API_BASE}/${postId}/verify/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.is_verified) {
-                    alert(`✅ Verified! Confidence: ${Math.round(data.verification_score * 100)}%`);
-                } else {
-                    alert(`⚠️ Needs review. Confidence: ${Math.round(data.verification_score * 100)}%`);
+    // ============================================================
+    // VERIFY POST
+    // ============================================================
+    function verifyPost(postId) {
+        fetch(`${API_BASE}/${postId}/verify/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.is_verified) {
+                alert(`✅ Verified! Confidence: ${Math.round(data.verification_score * 100)}%`);
+            } else {
+                alert(`⚠️ Needs review. Confidence: ${Math.round(data.verification_score * 100)}%`);
+            }
+            loadFeed(currentFeedType);
+            loadMyUploads();
+        })
+        .catch(() => alert('🔍 Verification in progress...'));
+    }
+
+    // ============================================================
+    // DELETE POST
+    // ============================================================
+    function deletePost(postId) {
+        if (!confirm('Delete this post? This cannot be undone.')) return;
+
+        fetch(`${API_BASE}/${postId}/delete/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': getCSRFToken() },
+        })
+        .then(res => {
+            if (res.status === 204) {
+                currentPosts = currentPosts.filter(p => p.id !== postId);
+                renderPosts(currentPosts);
+                loadMyUploads();
+                showToast('Post deleted successfully.');
+            } else {
+                return res.json().then(data => {
+                    throw new Error(data.error || 'Delete failed');
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Delete error:', err);
+            alert('Error deleting post: ' + err.message);
+        });
+    }
+
+    // ============================================================
+    // POLLING
+    // ============================================================
+    function startPolling(postId) {
+        if (pendingPostIds.has(postId)) return;
+        pendingPostIds.add(postId);
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`${API_BASE}/posts/${postId}/`);
+                if (!res.ok) throw new Error('API error');
+                const data = await res.json();
+                
+                if (data.verification_status && data.verification_status !== 'pending') {
+                    clearInterval(interval);
+                    pendingPostIds.delete(postId);
+                    updatePostCard(data);
+                    loadMyUploads();
+                    showToast(`Verification complete! Status: ${data.verification_status}`);
                 }
-                loadFeed();
-            })
-            .catch(() => alert('🔍 Verification in progress...'));
-        }
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }, 3000);
 
-        function timeAgo(dateString) {
-            const now = new Date();
-            const past = new Date(dateString);
-            const diff = Math.floor((now - past) / 1000);
-            if (diff < 60) return 'Just now';
-            if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-            if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-            if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
-            return `${Math.floor(diff / 604800)}w`;
-        }
+        setTimeout(() => {
+            clearInterval(interval);
+            pendingPostIds.delete(postId);
+        }, 60000);
+    }
 
-        tabContainer.addEventListener('click', function(e) {
-            const tab = e.target.closest('.tab-btn');
-            if (tab) {
-                const type = tab.dataset.type;
-                loadFeed(type);
+    function updatePostCard(data) {
+        const card = document.querySelector(`.post-card[data-post-id="${data.id}"]`);
+        if (!card) return;
+
+        const overlay = card.querySelector('.verification-overlay');
+        if (overlay) {
+            const isVerified = data.is_verified;
+            const badgeClass = isVerified ? 'verified' : (data.verification_status === 'flagged' ? 'flagged' : 'pending');
+            const badgeIcon = isVerified ? 'fa-check-circle' : (data.verification_status === 'flagged' ? 'fa-flag' : 'fa-clock');
+            const badgeText = isVerified ? 'Verified' : (data.verification_status === 'flagged' ? 'Flagged' : 'Pending');
+            
+            overlay.className = `verification-overlay ${badgeClass}`;
+            overlay.innerHTML = `<i class="fas ${badgeIcon}"></i> ${badgeText}`;
+        }
+        
+        const pointsOverlay = card.querySelector('.points-overlay');
+        if (pointsOverlay && data.points > 5) {
+            pointsOverlay.innerHTML = `<i class="fas fa-leaf"></i> ${data.points} pts`;
+        } else if (pointsOverlay && data.points <= 5) {
+            pointsOverlay.remove();
+        }
+    }
+
+    // ============================================================
+    // UPLOAD FILTERS
+    // ============================================================
+    document.addEventListener('click', function(e) {
+        const filterBtn = e.target.closest('.filter-btn');
+        if (filterBtn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            filterBtn.classList.add('active');
+            currentUploadFilter = filterBtn.dataset.filter;
+            loadMyUploads();
+        }
+    });
+
+    // ============================================================
+    // BOTTOM NAV (Mobile) – Override from base.html
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const bottomNavLinks = document.querySelectorAll('.bottom-nav .nav-item');
+        bottomNavLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href === '/') {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab('home');
+                    bottomNavLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            } else if (href === '/challenges/') {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab('challenges');
+                    bottomNavLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            } else if (href === '/rewards/') {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab('rewards');
+                    bottomNavLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            } else if (href === '/profile/') {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab('profile');
+                    bottomNavLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
             }
         });
+    });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadStories();
-            loadFeed('all');
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStories();
+        loadFeed('all');
+
+        // Sync bottom nav active state with current URL
+        const path = window.location.pathname;
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+            item.classList.remove('active');
+            const href = item.getAttribute('href');
+            if (href === path || (path === '/' && href === '/')) {
+                item.classList.add('active');
+            }
         });
-    </script>
+    });
+</script>
 {% endblock %}

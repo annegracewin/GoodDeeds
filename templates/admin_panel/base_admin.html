@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel – GoodDeeds</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f6f9;
+        }
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            background: #1e293b;
+            color: white;
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 1050;
+        }
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+        .sidebar .brand i {
+            color: #22c55e;
+        }
+        .sidebar .nav-link {
+            color: #cbd5e1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: 2px 10px;
+            transition: 0.2s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: #334155;
+            color: white;
+        }
+        .sidebar .nav-link i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px 30px;
+            min-height: 100vh;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e9edf2;
+        }
+        .stats-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .stats-card .label {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        .badge-pending { background: #f59e0b; }
+        .badge-approved { background: #22c55e; }
+        .badge-rejected { background: #ef4444; }
+        .action-btn {
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+        }
+        .action-btn.approve { background: #22c55e; color: white; }
+        .action-btn.reject { background: #ef4444; color: white; }
+        .action-btn.edit { background: #3b82f6; color: white; }
+        .action-btn.delete { background: #dc2626; color: white; }
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand">
+            <i class="fas fa-leaf"></i> GoodDeeds Admin
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'admin_panel:dashboard' %}">
+                <i class="fas fa-chart-pie"></i> Dashboard
+            </a>
+            <a class="nav-link {% if 'challenges' in request.path %}active{% endif %}" href="{% url 'admin_panel:challenges' %}">
+                <i class="fas fa-tasks"></i> Challenges
+            </a>
+            <a class="nav-link {% if 'rewards' in request.path %}active{% endif %}" href="{% url 'admin_panel:rewards' %}">
+                <i class="fas fa-gift"></i> Rewards
+            </a>
+            <a class="nav-link {% if 'users' in request.path %}active{% endif %}" href="{% url 'admin_panel:users' %}">
+                <i class="fas fa-users"></i> Users
+            </a>
+            <a class="nav-link {% if 'sponsors' in request.path %}active{% endif %}" href="{% url 'admin_panel:sponsors' %}">
+                <i class="fas fa-handshake"></i> Sponsors
+            </a>
+            <hr class="border-secondary">
+            <a class="nav-link" href="/">
+                <i class="fas fa-arrow-left"></i> Back to Site
+            </a>
+            <a class="nav-link" href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

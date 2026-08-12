@@ -1,0 +1,51 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Challenges</h3>
+    <a href="{% url 'admin_panel:create_challenge' %}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Add Challenge</a>
+</div>
+
+<div class="mb-3">
+    <a href="?status=all" class="btn btn-outline-secondary btn-sm {% if filter_status == 'all' %}active{% endif %}">All</a>
+    <a href="?status=pending" class="btn btn-outline-warning btn-sm {% if filter_status == 'pending' %}active{% endif %}">Pending</a>
+    <a href="?status=approved" class="btn btn-outline-success btn-sm {% if filter_status == 'approved' %}active{% endif %}">Approved</a>
+    <a href="?status=rejected" class="btn btn-outline-danger btn-sm {% if filter_status == 'rejected' %}active{% endif %}">Rejected</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Points</th>
+                <th>Status</th>
+                <th>Submitted By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for challenge in challenges %}
+            <tr>
+                <td>{{ challenge.title }}</td>
+                <td>{{ challenge.category }}</td>
+                <td>{{ challenge.points_reward }}</td>
+                <td><span class="badge badge-{{ challenge.status }}">{{ challenge.status }}</span></td>
+                <td>{{ challenge.submitted_by.username|default:"Admin" }}</td>
+                <td>
+                    {% if challenge.status == 'pending' %}
+                        <a href="{% url 'admin_panel:approve_challenge' challenge.id %}" class="action-btn approve">Approve</a>
+                        <a href="{% url 'admin_panel:reject_challenge' challenge.id %}" class="action-btn reject">Reject</a>
+                    {% endif %}
+                    <a href="{% url 'admin_panel:edit_challenge' challenge.id %}" class="action-btn edit">Edit</a>
+                    <a href="{% url 'admin_panel:delete_challenge' challenge.id %}" class="action-btn delete" onclick="return confirm('Delete this challenge?')">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No challenges found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

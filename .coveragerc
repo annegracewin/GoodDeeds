@@ -1,0 +1,20 @@
+[run]
+source = core
+omit = 
+    */tests/*
+    */migrations/*
+    */venv/*
+    */__init__.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if __name__ == .__main__.:
+    raise NotImplementedError
+    if False:
+    if TYPE_CHECKING:
+
+[html]
+directory = coverage_html

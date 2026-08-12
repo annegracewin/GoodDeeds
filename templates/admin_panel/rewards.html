@@ -1,0 +1,35 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Rewards</h3>
+    <a href="{% url 'admin_panel:create_reward' %}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Add Reward</a>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Points Cost</th>
+            <th>Stock</th>
+            <th>Active</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reward in rewards %}
+        <tr>
+            <td>{{ reward.name }}</td>
+            <td>{{ reward.points_cost }}</td>
+            <td>{{ reward.stock_quantity }}</td>
+            <td>{% if reward.is_active %}✅{% else %}❌{% endif %}</td>
+            <td>
+                <a href="{% url 'admin_panel:edit_reward' reward.id %}" class="action-btn edit">Edit</a>
+                <a href="{% url 'admin_panel:delete_reward' reward.id %}" class="action-btn delete" onclick="return confirm('Delete this reward?')">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No rewards found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

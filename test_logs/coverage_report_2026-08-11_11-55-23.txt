@@ -1,0 +1,26 @@
+================================================================================
+GOODDEEDS – COVERAGE REPORT
+Date: 2026-08-11 11:55:23
+================================================================================
+
+$ C:\Users\anneg\gooddeeds\venv\Scripts\python.exe -m coverage run manage.py test core.tests
+----------------------------------------
+ERRORS:
+C:\Users\anneg\gooddeeds\venv\Scripts\python.exe: No module named coverage
+
+----------------------------------------
+
+$ C:\Users\anneg\gooddeeds\venv\Scripts\python.exe -m coverage report --include=core/*
+----------------------------------------
+ERRORS:
+C:\Users\anneg\gooddeeds\venv\Scripts\python.exe: No module named coverage
+
+----------------------------------------
+
+$ C:\Users\anneg\gooddeeds\venv\Scripts\python.exe -m coverage html --include=core/* -d coverage_html
+----------------------------------------
+ERRORS:
+C:\Users\anneg\gooddeeds\venv\Scripts\python.exe: No module named coverage
+
+----------------------------------------
+

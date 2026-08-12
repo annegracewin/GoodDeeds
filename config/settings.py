@@ -18,7 +18,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'core',          # ← Our API app
-    'users',        # ← Users app
+    'users',
+    'admin_panel'   # ← Admin panel
 ]
 
 # ===== MIDDLEWARE =====
@@ -66,6 +67,11 @@ DATABASES = {
         'OPTIONS': {
             'charset': 'utf8mb4',
         },
+
+        'TEST': {
+            'USER': 'root',
+            'PASSWORD': 'anne123'
+        }
     }
 }
 
@@ -104,6 +110,71 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'users.User'
 
 
+# Add this to settings.py
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} - {levelname} - {module} - {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} - {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'formatter': 'verbose',
+        },
+        'verification_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'verification.log'),
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'core': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'ai_verify': {
+            'handlers': ['verification_file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
 # Add this at the bottom
-GEMINI_API_KEY = 'your-gemini-api-key-here'  # Or use environment variable
+GEMINI_API_KEY = 'AQ.Ab8RN6LYnIHpZDXS-NSAZdnJGh_EZLXI793OEktNcoAbL2uTHw'  # Or use environment variable
+
+# ===== AGNES AI (OpenAI‑compatible) =====
+AGNES_API_KEY = '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'
+AGNES_BASE_URL = 'https://api.groq.com/openai/v1'   # or custom endpoint
+AGNES_MODEL = 'llama-3.3-70b-versatile'              # or any supported model
+
+# Ensure these are at the bottom
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Maximum file size (optional - 10MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760   # 10MB

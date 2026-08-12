@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Rewards Store{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="fw-bold mb-4"><i class="fas fa-gift text-success me-2"></i>Rewards Store</h2>
+        <p>Your Points: <span id="userPoints">Loading...</span></p>
+    </div>
+    <div id="rewardContainer" class="row g-4">
+        <!-- Loaded by JS -->
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch user points
+    fetch('/api/auth/user/')
+        .then(res => res.json())
+        .then(user => document.getElementById('userPoints').innerText = user.nature_points || 0)
+        .catch(() => document.getElementById('userPoints').innerText = '0');
+
+    fetch('/api/rewards/')
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('rewardContainer');
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-muted">No rewards available.</p>`;
+                return;
+            }
+            container.innerHTML = data.map(r => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="${r.image || 'https://picsum.photos/400/200'}" class="card-img-top" alt="${r.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${r.name}</h5>
+                            <p class="card-text">${r.description}</p>
+                            <p><span class="badge bg-warning text-dark">${r.points_cost} pts</span></p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-primary w-100" onclick="redeemReward(${r.id})">
+                                <i class="fas fa-exchange-alt me-1"></i> Redeem
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        });
+});
+
+function redeemReward(id) {
+    if (!confirm('Redeem this reward?')) return;
+    fetch(`/api/rewards/${id}/redeem/`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            alert('Redemption successful! Please wait for approval.');
+            location.reload();
+        })
+        .catch(err => alert('Error: ' + err.message));
+}
+</script>
+{% endblock %}

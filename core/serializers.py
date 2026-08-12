@@ -1,23 +1,31 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Post, Challenge, ChallengeParticipant, Reward, RewardRedemption
+from .models import Post, Challenge, ChallengeParticipant, Reward, RewardRedemption,Like
 
 User = get_user_model()
 
 
+# Ensure PostSerializer includes the 'image' field
 class PostSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     user_id = serializers.CharField(source='user.id', read_only=True)
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
-            'id', 'user_id', 'username', 'image_url', 'caption',
-            'hashtags', 'location', 'is_verified', 'verification_score',
-            'likes', 'comments_count', 'shares', 'points', 'created_at'
+            'id', 'user_id', 'username', 'image', 'image_url', 'caption',
+            'hashtags', 'location', 'is_verified', 'verification_score', 
+            'verification_status', 'likes', 'comments_count', 'shares', 
+            'points', 'created_at', 'is_liked'
         ]
+        read_only_fields = ['is_verified', 'verification_score', 'verification_status', 'points']
 
-
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return Like.objects.filter(user=request.user, post=obj).exists()
+        return False
 class UserSerializer(serializers.ModelSerializer):
     profile_pic = serializers.SerializerMethodField()
 

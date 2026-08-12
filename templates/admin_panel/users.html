@@ -1,0 +1,35 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block content %}
+<h3 class="mb-4">Users</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Points</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.nature_points }}</td>
+            <td>{{ user.date_joined|date:"Y-m-d" }}</td>
+            <td>{% if user.is_active %}Active{% else %}Suspended{% endif %}</td>
+            <td>
+                <a href="{% url 'admin_panel:toggle_user' user.id %}" class="action-btn {% if user.is_active %}reject{% else %}approve{% endif %}">
+                    {% if user.is_active %}Suspend{% else %}Activate{% endif %}
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No users found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

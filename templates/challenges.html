@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Challenges{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="fw-bold mb-4"><i class="fas fa-tasks text-success me-2"></i>Active Challenges</h2>
+    </div>
+    <div id="challengeContainer" class="row g-4">
+        <!-- Loaded by JS -->
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/challenges/')
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('challengeContainer');
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-muted">No active challenges right now. Check back soon!</p>`;
+                return;
+            }
+            container.innerHTML = data.map(ch => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="${ch.image || 'https://picsum.photos/400/200'}" class="card-img-top" alt="${ch.title}">
+                        <div class="card-body">
+                            <h5 class="card-title">${ch.title}</h5>
+                            <p class="card-text text-secondary">${ch.description}</p>
+                            <span class="badge bg-success">${ch.category}</span>
+                            <span class="badge bg-primary">${ch.points_reward} pts</span>
+                            <p class="mt-2"><i class="fas fa-users"></i> ${ch.participants_count} participants</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-success w-100" onclick="joinChallenge(${ch.id})">
+                                <i class="fas fa-hand-peace me-1"></i> Join Challenge
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        });
+});
+
+function joinChallenge(id) {
+    fetch(`/api/challenges/${id}/join/`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => alert(data.message))
+        .catch(() => alert('Please login to join!'));
+}
+</script>
+{% endblock %}

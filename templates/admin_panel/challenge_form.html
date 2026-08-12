@@ -1,0 +1,11 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block content %}
+<h3>{{ action }} Challenge</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{% url 'admin_panel:challenges' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

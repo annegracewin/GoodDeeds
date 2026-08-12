@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4 text-center">
+        <img src="{{ user.profile_pic|default:'https://ui-avatars.com/api/?name='|add:user.username|add:'&background=2e7d32&color=fff&size=128' }}" 
+             class="rounded-circle img-thumbnail" style="width:150px;height:150px;">
+        <h3 class="mt-3">{{ user.username }}</h3>
+        <p class="text-muted">{{ user.location|default:'No location set' }}</p>
+        <div class="d-flex justify-content-around mt-3">
+            <div><strong>{{ user.nature_points }}</strong><br>Points</div>
+            <div><strong>{{ user.total_posts }}</strong><br>Posts</div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <h4>My Posts</h4>
+        <div id="userPosts">
+            <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/feed/?user={{ user.id }}')
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('userPosts');
+            if (data.length === 0) {
+                container.innerHTML = '<p class="text-muted">No posts yet.</p>';
+                return;
+            }
+            container.innerHTML = data.map(p => `
+                <div class="post-card mb-3">
+                    <div class="post-header">
+                        <img src="https://ui-avatars.com/api/?name=${p.username}&background=2e7d32&color=fff&size=40" class="post-avatar">
+                        <span class="post-user">${p.username}</span>
+                        <span class="post-time">${new Date(p.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div class="post-image-wrapper">
+                        <img src="${p.image || p.image_url}" class="post-image" style="max-height:300px;">
+                    </div>
+                    <div class="post-caption">
+                        <span class="caption-text">${p.caption}</span>
+                    </div>
+                    <div class="post-meta">
+                        <span>❤️ ${p.likes} likes</span>
+                        <span class="ms-3">✅ ${p.is_verified ? 'Verified' : 'Pending'}</span>
+                    </div>
+                </div>
+            `).join('');
+        });
+});
+</script>
+{% endblock %}

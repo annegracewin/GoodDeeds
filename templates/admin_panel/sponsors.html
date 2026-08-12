@@ -1,0 +1,35 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Sponsors</h3>
+    <a href="{% url 'admin_panel:create_sponsor' %}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Add Sponsor</a>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Website</th>
+            <th>Active</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sponsor in sponsors %}
+        <tr>
+            <td>{{ sponsor.name }}</td>
+            <td><a href="mailto:{{ sponsor.email }}">{{ sponsor.email }}</a></td>
+            <td>{% if sponsor.website %}<a href="{{ sponsor.website }}" target="_blank">Link</a>{% endif %}</td>
+            <td>{% if sponsor.is_active %}✅{% else %}❌{% endif %}</td>
+            <td>
+                <a href="{% url 'admin_panel:edit_sponsor' sponsor.id %}" class="action-btn edit">Edit</a>
+                <a href="{% url 'admin_panel:delete_sponsor' sponsor.id %}" class="action-btn delete" onclick="return confirm('Delete this sponsor?')">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No sponsors found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
